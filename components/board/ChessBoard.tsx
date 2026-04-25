@@ -16,6 +16,7 @@ interface ChessBoardProps {
     error: string | null
   }
   boardWidth?: number
+  disabled?: boolean
 }
 
 export function ChessBoard({
@@ -24,6 +25,7 @@ export function ChessBoard({
   gameStateOverride,
   makeMoveOverride,
   boardWidth = 560,
+  disabled = false,
 }: ChessBoardProps): JSX.Element {
   const { game, gameState, makeMove } = useChessGame(gameMode)
   const currentState = gameStateOverride ?? gameState
@@ -46,9 +48,15 @@ export function ChessBoard({
         boardWidth={boardWidth}
         customBoardStyle={{
           borderRadius: '0.75rem',
-          boxShadow: '0 6px 24px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
         }}
+        customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
+        customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
+        arePiecesDraggable={!disabled}
         onPieceDrop={(sourceSquare, targetSquare) => {
+          if (disabled) {
+            return false
+          }
           const result = moveExecutor(sourceSquare, targetSquare, 'q')
           if (!result.success && result.error) {
             toast.error(result.error)

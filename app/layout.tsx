@@ -1,34 +1,33 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { ThemeProvider } from 'next-themes'
-import type { ReactNode } from 'react'
+import type { Metadata } from "next"
+import { Space_Grotesk } from "next/font/google"
+import "./globals.css"
+import { Navbar } from "@/components/layout/Navbar"
+import { AuthProvider } from "@/components/AuthProvider"
+import { Toaster } from "sonner"
 
-import { AuthProvider } from '@/components/AuthProvider'
-import { Toaster } from '@/components/ui/sonner'
-import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: {
-    default: 'ChessMind',
-    template: '%s | ChessMind',
+  title: "ChessMind - Learn Chess with AI Coach",
+  description: "Master chess with AI analysis, play against Stockfish, and improve your game.",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟️</text></svg>",
   },
-  description: 'Modern chess platform with local, AI, and multiplayer game modes.',
 }
 
-interface RootLayoutProps {
-  children: ReactNode
-}
-
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AuthProvider>{children}</AuthProvider>
+      <body className={`${spaceGrotesk.className} bg-slate-950 text-white antialiased`}>
+        <AuthProvider>
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
           <Toaster />
-        </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

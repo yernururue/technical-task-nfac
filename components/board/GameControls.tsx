@@ -19,22 +19,22 @@ export function GameControls({
   disabled = false,
 }: GameControlsProps): JSX.Element {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Game Controls</CardTitle>
+    <Card className="glass-card border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
+      <CardHeader className="pb-3 pt-4">
+        <CardTitle className="text-lg tracking-tight">Game Controls</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-2">
-        <Button onClick={onNewGame} type="button" variant="default" disabled={disabled}>
-          <RotateCcw className="size-4" />
+      <CardContent className="grid grid-cols-2 gap-2">
+        <Button onClick={onNewGame} type="button" variant="default" disabled={disabled} className="col-span-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+          <RotateCcw className="mr-2 h-4 w-4" />
           New Game
         </Button>
-        <Button onClick={onResign} type="button" variant="destructive" disabled={disabled}>
-          <Flag className="size-4" />
+        <Button onClick={onResign} type="button" variant="destructive" disabled={disabled} className="shadow-lg shadow-destructive/20 hover:shadow-destructive/40 transition-shadow">
+          <Flag className="mr-2 h-4 w-4" />
           Resign
         </Button>
-        <Button onClick={onOfferDraw} type="button" variant="outline" disabled={disabled}>
-          <Handshake className="size-4" />
-          Offer Draw
+        <Button onClick={onOfferDraw} type="button" variant="outline" disabled={disabled} className="border-border/50 bg-background/50 hover:bg-background/80 shadow-sm">
+          <Handshake className="mr-2 h-4 w-4 text-amber-500" />
+          Draw
         </Button>
       </CardContent>
     </Card>

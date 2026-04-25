@@ -49,11 +49,11 @@ export function MoveHistory({ pgn, currentMove }: MoveHistoryProps): JSX.Element
   }, [pgn])
 
   return (
-    <Card className="max-h-[420px]">
-      <CardHeader>
-        <CardTitle>Move History</CardTitle>
+    <Card className="glass-card flex max-h-[420px] flex-col border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
+      <CardHeader className="flex-none pb-3 pt-4">
+        <CardTitle className="text-lg tracking-tight">Move History</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-1 text-sm">
+      <CardContent className="flex-1 space-y-1 overflow-y-auto pr-2 text-sm">
         {groupedMoves.length === 0 ? (
           <p className="text-muted-foreground">No moves yet.</p>
         ) : (
@@ -61,12 +61,12 @@ export function MoveHistory({ pgn, currentMove }: MoveHistoryProps): JSX.Element
             const whiteIndex = (pair.moveNumber - 1) * 2
             const blackIndex = whiteIndex + 1
             return (
-              <div key={pair.moveNumber} className="grid grid-cols-[2rem_1fr_1fr] items-center gap-2 rounded px-1 py-0.5">
-                <span className="text-muted-foreground">{pair.moveNumber}.</span>
-                <span className={currentMove === whiteIndex ? 'rounded bg-accent px-1 py-0.5 font-medium' : ''}>
+              <div key={pair.moveNumber} className="grid grid-cols-[2.5rem_1fr_1fr] items-center gap-2 rounded px-2 py-1 transition-colors hover:bg-white/5">
+                <span className="text-muted-foreground font-mono">{pair.moveNumber}.</span>
+                <span className={currentMove === whiteIndex ? 'rounded bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400' : 'px-2 py-0.5'}>
                   {pair.white ?? '-'}
                 </span>
-                <span className={currentMove === blackIndex ? 'rounded bg-accent px-1 py-0.5 font-medium' : ''}>
+                <span className={currentMove === blackIndex ? 'rounded bg-blue-500/20 px-2 py-0.5 font-semibold text-blue-400' : 'px-2 py-0.5'}>
                   {pair.black ?? '-'}
                 </span>
               </div>

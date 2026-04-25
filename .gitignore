@@ -1,0 +1,5 @@
+# Ignore generated files, dependencies, and local secrets.
+.env.local
+.next/
+node_modules/
+plan_osnova.md

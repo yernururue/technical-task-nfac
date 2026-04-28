@@ -27,7 +27,9 @@ export function ChessBoard({
   boardWidth = 560,
   disabled = false,
 }: ChessBoardProps): JSX.Element {
-  const { game, gameState, makeMove } = useChessGame(gameMode)
+  // Always use 'local' internally — AI page provides its own state/moves via overrides.
+  // This prevents creating a duplicate Stockfish worker.
+  const { game, gameState, makeMove } = useChessGame('local')
   const currentState = gameStateOverride ?? gameState
   const moveExecutor = makeMoveOverride ?? makeMove
 

@@ -1,11 +1,12 @@
 'use client'
 
 import { Chess, type Move } from 'chess.js'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useStockfish } from '@/hooks/useStockfish'
-import type { StockfishLevel } from '@/lib/chess/stockfish'
 import type { GameResult, GameState } from '@/types/game'
+
+export type ChessLevel = 1 | 2 | 3
 
 type PromotionPiece = 'q' | 'r' | 'b' | 'n'
 
@@ -33,9 +34,9 @@ interface UseChessGameResult {
   getPGN: () => string
   isGameOver: () => GameOverState
   resignGame: (color: 'white' | 'black') => void
-  isStockfishLoading: boolean
-  aiLevel: StockfishLevel
-  setAiLevel: (level: StockfishLevel) => void
+  isEngineLoading: boolean
+  aiLevel: ChessLevel
+  setAiLevel: (level: ChessLevel) => void
 }
 
 function createInitialGameState(mode: 'local' | 'ai' = 'local'): GameState {
@@ -124,12 +125,19 @@ function buildGameState(game: Chess, mode: 'local' | 'ai', previousState: GameSt
   }
 }
 
-export function useChessGame(mode: 'local' | 'ai' = 'local', aiLevel: StockfishLevel = 2): UseChessGameResult {
-  const [currentAiLevel, setCurrentAiLevel] = useState<StockfishLevel>(aiLevel)
-  const { getAIMove, isLoading: isStockfishLoading } = useStockfish(mode === 'ai')
+export function useChessGame(mode: 'local' | 'ai' = 'local', aiLevel: ChessLevel = 2): UseChessGameResult {
+  const [currentAiLevel, setCurrentAiLevel] = useState<ChessLevel>(aiLevel)
+  const { getBestMove, isReady: isEngineReady, error: engineError } = useStockfish(mode === 'ai')
+  const isEngineLoading = mode === 'ai' && !isEngineReady
   const [game, setGame] = useState<Chess>(() => new Chess())
+  const gameRef = useRef<Chess>(game)
   const [gameHistory, setGameHistory] = useState<string[]>([])
   const [gameState, setGameState] = useState<GameState>(() => createInitialGameState(mode))
+
+  // Keep ref in sync so async callbacks always see the latest game
+  useEffect(() => {
+    gameRef.current = game
+  }, [game])
 
   useEffect(() => {
     setCurrentAiLevel(aiLevel)
@@ -186,30 +194,45 @@ export function useChessGame(mode: 'local' | 'ai' = 'local', aiLevel: StockfishL
   const getCurrentFen = useCallback((): string => game.fen(), [game])
 
   const makeAIMove = useCallback(async (): Promise<boolean> => {
-    if (!game || mode !== 'ai') {
+    const currentGame = gameRef.current
+    if (!currentGame || mode !== 'ai') return false
+
+    try {
+      const fen = currentGame.fen()
+      // Map level to Stockfish search depth
+      const depthMap: Record<ChessLevel, number> = { 1: 8, 2: 12, 3: 18 }
+      const depth = depthMap[currentAiLevel] ?? 12
+
+      console.log('[makeAIMove] Requesting move for FEN:', fen, 'depth:', depth)
+      const uciMove = await getBestMove(fen, depth)
+
+      if (!uciMove) {
+        console.warn('[Chess] No AI move returned')
+        return false
+      }
+
+      // UCI format: e2e4 or e7e8q (with promotion)
+      const from = uciMove.substring(0, 2)
+      const to = uciMove.substring(2, 4)
+      const promotion = uciMove.length > 4 ? (uciMove[4] as PromotionPiece) : undefined
+
+      console.log(`[Chess] AI move: ${from} → ${to}${promotion ? ` (=${promotion})` : ''}`)
+
+      // Apply AI move to the LATEST game state via ref
+      const latestGame = gameRef.current
+      const nextGame = cloneGame(latestGame)
+      const move = nextGame.move({ from, to, promotion })
+      if (!move) {
+        console.error('[Chess] AI move rejected by chess.js:', from, to)
+        return false
+      }
+      syncState(nextGame)
+      return true
+    } catch (err) {
+      console.error('[Chess] AI move error:', err)
       return false
     }
-
-    const fen = game.fen()
-    const uciMove = await getAIMove(fen, currentAiLevel)
-
-    if (!uciMove) {
-      console.warn('No AI move returned')
-      return false
-    }
-
-    if (uciMove.length < 4) {
-      return false
-    }
-
-    const from = uciMove.substring(0, 2)
-    const to = uciMove.substring(2, 4)
-    const promotion = (uciMove[4] || undefined) as PromotionPiece | undefined
-
-    console.log('Making AI move:', from, to, promotion)
-    const result = makeMove(from, to, promotion)
-    return result.success
-  }, [currentAiLevel, game, getAIMove, makeMove, mode])
+  }, [currentAiLevel, getBestMove, mode, syncState])
 
   const resetGame = useCallback((): void => {
     const nextGame = new Chess()
@@ -275,7 +298,7 @@ export function useChessGame(mode: 'local' | 'ai' = 'local', aiLevel: StockfishL
     isGameOver,
     resignGame,
     makeAIMove,
-    isStockfishLoading,
+    isEngineLoading,
     aiLevel: currentAiLevel,
     setAiLevel: setCurrentAiLevel,
   }

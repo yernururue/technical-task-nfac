@@ -1,1 +1,0 @@
-Not found: /stockfish.wasm@0.2.0/dist/stockfish.js

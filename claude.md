@@ -2,7 +2,7 @@
 # ChessMind — Project Memory
 
 ## What This Project Is
-Chess platform with AI coach, play vs Stockfish, and multiplayer via link.
+Chess platform with AI coach, play vs AI, and multiplayer via link.
 Target: Russian-speaking chess learners who want to understand their mistakes.
 
 ## Architecture
@@ -12,7 +12,7 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 - Auth: Supabase Auth (email + Google OAuth)  
 - Realtime: Supabase Broadcast for multiplayer move sync
 - Chess logic: chess.js (validation + PGN generation)
-- AI Engine: Stockfish WASM in Web Worker (no server needed)
+- Chess Engine: Stockfish 11 asm.js (local, runs in Web Worker, no WASM/SharedArrayBuffer needed)
 - AI Coach: Gemini 2.5 Flash (primary) → OpenRouter Llama 3.3 70B (fallback)
 
 ## Key Design Decisions
@@ -31,9 +31,12 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 ## File Conventions
 - lib/supabase/ — all Supabase clients and helpers
 - lib/ai/ — all AI provider logic (never import in client components)
-- lib/chess/ — chess.js and Stockfish helpers
+- lib/chess/ — chess.js utilities (PGN helpers, etc.)
 - app/api/ — server-only routes, API keys live here
 - hooks/ — React hooks only, no direct DB calls
+- hooks/useStockfish.ts — Stockfish Web Worker hook (init, getBestMove)
+- hooks/useChessGame.ts — main game state hook (local + AI modes)
+- public/stockfish.js — Stockfish 11 asm.js engine (served as static file)
 
 ## Environment Variables
 - NEXT_PUBLIC_* — safe for browser
@@ -64,8 +67,17 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 - Updated `lib/supabase/server.ts` with the same typed env helper pattern for `createServerClient()` arguments.
 - Added `"ignoreDeprecations": "6.0"` in `tsconfig.json` to handle TS6 `baseUrl` deprecation error during `next build`.
 
+### [2026-04-28] Stockfish AI engine integration
+- Removed Lichess Cloud Eval API (was just a cache, returned 404 on non-standard positions)
+- Removed `hooks/useChessEngine.ts` and `lib/chess/lichess-engine.ts`
+- Added Stockfish 11 asm.js (nmrugg/stockfish.js) — pure JS, single-threaded, no WASM/SharedArrayBuffer
+- Created `hooks/useStockfish.ts` — Web Worker with 5s init timeout, UCI protocol (uci → uciok → position fen → go depth → bestmove)
+- Fixed race condition in `app/play/ai/page.tsx` — `isAIThinking` in useEffect deps was killing setTimeout via cleanup
+- Fixed stale closure in `makeAIMove` — switched to `gameRef.current` for latest game state
+- Fixed `ChessBoard` creating duplicate Stockfish Worker — now uses 'local' mode internally
+- Difficulty levels: Easy (depth 8), Medium (depth 12), Hard (depth 18)
+
 ## What's Not Done Yet
-- [ ] Stockfish WASM file (download separately)
 - [ ] Apply SQL migrations in Supabase Dashboard
 - [ ] Fill .env.local with real keys
 - [ ] shadcn components (run: npx shadcn@latest add button card ... )

@@ -30,8 +30,8 @@ const config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)"],
-        mono: ["var(--font-geist-mono)"],
+        sans: ["var(--font-sans)"],
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"],
         display: ["Space Grotesk", "sans-serif"],
       },
       borderRadius: {

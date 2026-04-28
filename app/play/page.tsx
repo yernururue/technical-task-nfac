@@ -39,7 +39,7 @@ export default function PlayPage() {
               <Cpu className="w-12 h-12 text-cyan-400 mb-4" />
               <CardTitle className="text-2xl text-white">Play vs AI</CardTitle>
               <CardDescription className="text-slate-400">
-                Challenge the Stockfish engine
+                Challenge the AI engine
               </CardDescription>
             </CardHeader>
             <CardContent>

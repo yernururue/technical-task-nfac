@@ -1,147 +1,205 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Bot, Brain, Cpu, Zap, User, Loader2, AlertCircle } from 'lucide-react'
-
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ChessBoard } from '@/components/board/ChessBoard'
-import { GameControls } from '@/components/board/GameControls'
 import { MoveHistory } from '@/components/board/MoveHistory'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { GameControls } from '@/components/board/GameControls'
 import { useChessGame } from '@/hooks/useChessGame'
-import type { StockfishLevel } from '@/lib/chess/stockfish'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { AlertCircle, Loader2 } from 'lucide-react'
+import type { ChessLevel } from '@/hooks/useChessGame'
 
-export default function AIPlayPage(): JSX.Element {
-  const [aiLevel, setAiLevel] = useState<StockfishLevel>(2)
-  const { game, gameState, makeMove, makeAIMove, resetGame, isStockfishLoading, isGameOver } = useChessGame('ai', aiLevel)
+export default function AIPlayPage() {
+  const router = useRouter()
+  const [aiLevel, setAiLevel] = useState<ChessLevel>(2)
   const [isAIThinking, setIsAIThinking] = useState(false)
 
+  const {
+    game,
+    gameState,
+    makeMove,
+    makeAIMove,
+    isEngineLoading,
+    isGameOver,
+  } = useChessGame('ai', aiLevel)
+
+  // Stable refs so the effect doesn't re-fire when function identities change
+  const makeAIMoveRef = useRef(makeAIMove)
+  useEffect(() => { makeAIMoveRef.current = makeAIMove }, [makeAIMove])
+
+  const isGameOverRef = useRef(isGameOver)
+  useEffect(() => { isGameOverRef.current = isGameOver }, [isGameOver])
+
+  // Ref to guard against double-triggers without causing re-renders
+  const isThinkingRef = useRef(false)
+
+  // Auto-make AI move when it's black's turn
   useEffect(() => {
-    if (!isStockfishLoading && !isAIThinking && gameState.currentTurn === 'black' && !isGameOver().isOver) {
+    if (
+      !isEngineLoading &&
+      gameState.currentTurn === 'black' &&
+      !isThinkingRef.current &&
+      !isGameOverRef.current().isOver
+    ) {
+      isThinkingRef.current = true
       setIsAIThinking(true)
-      const timer = window.setTimeout(async () => {
-        const success = await makeAIMove()
-        console.log('AI move result:', success)
+
+      const timer = setTimeout(async () => {
+        try {
+          const success = await makeAIMoveRef.current()
+          if (!success) {
+            console.warn('[AI Play] AI move failed')
+          }
+        } catch (err) {
+          console.error('[AI Play] Error:', err)
+        } finally {
+          isThinkingRef.current = false
+          setIsAIThinking(false)
+        }
+      }, 500)
+
+      return () => {
+        clearTimeout(timer)
+        isThinkingRef.current = false
         setIsAIThinking(false)
-      }, 600)
-
-      return () => window.clearTimeout(timer)
+      }
     }
-
-    if (isGameOver().isOver && isAIThinking) {
-      setIsAIThinking(false)
-    }
-
-    return
-  }, [gameState.currentTurn, isStockfishLoading, isAIThinking, makeAIMove, isGameOver])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState.currentTurn, isEngineLoading])
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 relative">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-      
-      <div className="container relative mx-auto flex flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start max-w-7xl z-10 animate-slide-up">
-        <div className="flex-1 flex flex-col items-center lg:items-end justify-center w-full">
-          <div className="w-full max-w-[640px] flex flex-col gap-4">
-            
-            {/* Player Info Bars */}
-            <div className="flex items-center justify-between bg-black/20 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center bg-purple-500/20 rounded-lg text-purple-400">
-                  <Bot className="h-6 w-6" />
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Play vs AI</h1>
+          <p className="text-slate-400">You are White</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Board */}
+          <div className="lg:col-span-2">
+            {/* Status alerts */}
+            {isEngineLoading && (
+              <div className="mb-4 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg flex gap-3">
+                <Loader2 className="w-5 h-5 text-yellow-500 animate-spin flex-shrink-0" />
                 <div>
-                  <h3 className="font-bold text-slate-100 flex items-center gap-2">
-                    Stockfish AI
-                    {isStockfishLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Level {aiLevel} • 
-                    {isAIThinking ? <span className="text-purple-400 ml-1">Thinking...</span> : <span className="ml-1">Ready</span>}
+                  <p className="text-sm font-medium text-yellow-200">Initializing chess engine...</p>
+                  <p className="text-xs text-yellow-300 mt-1">Ready to play in a moment</p>
+                </div>
+              </div>
+            )}
+
+            {isAIThinking && (
+              <div className="mb-4 p-4 bg-blue-900/20 border border-blue-700 rounded-lg flex gap-3">
+                <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0" />
+                <p className="text-sm font-medium text-blue-200">AI is thinking...</p>
+              </div>
+            )}
+
+            {isGameOver().isOver && (
+              <div className="mb-4 p-4 bg-green-900/20 border border-green-700 rounded-lg flex gap-3">
+                <AlertCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-green-200">Game Over</p>
+                  <p className="text-xs text-green-300 mt-1">
+                    {isGameOver().reason === 'checkmate' ? 'Checkmate' : 'Game Finished'}
                   </p>
                 </div>
               </div>
-              <Badge variant={gameState.currentTurn === 'black' ? 'default' : 'secondary'} className={gameState.currentTurn === 'black' ? 'bg-purple-600 hover:bg-purple-600' : ''}>
-                {gameState.currentTurn === 'black' ? 'To Move' : 'Waiting'}
-              </Badge>
-            </div>
+            )}
 
-            <div className="mx-auto w-full flex justify-center">
+            {/* Chess board */}
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-2xl">
               <ChessBoard
                 gameMode="ai"
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
-                disabled={isStockfishLoading || isAIThinking || gameState.currentTurn === 'black'}
+                disabled={isAIThinking || gameState.currentTurn === 'black' || isEngineLoading}
               />
             </div>
-
-            <div className="flex items-center justify-between bg-black/20 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 flex items-center justify-center bg-blue-500/20 rounded-lg text-blue-400">
-                  <User className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-100">You</h3>
-                  <p className="text-xs text-slate-400">Playing White</p>
-                </div>
-              </div>
-              <Badge variant={gameState.currentTurn === 'white' ? 'default' : 'secondary'} className={gameState.currentTurn === 'white' ? 'bg-blue-600 hover:bg-blue-600' : ''}>
-                {gameState.currentTurn === 'white' ? 'Your Turn' : 'Waiting'}
-              </Badge>
-            </div>
-            
           </div>
-        </div>
 
-        <aside className="w-full lg:w-80 flex flex-col gap-4">
-          <Card className="glass-card border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
-            <CardHeader className="pb-3 pt-4 text-foreground">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Brain className="h-5 w-5 text-purple-400" />
-                AI Difficulty
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Difficulty selector */}
+            <Card className="bg-slate-800 border-slate-700 p-4">
+              <h3 className="text-sm font-semibold text-white mb-3">Difficulty</h3>
               <div className="grid grid-cols-3 gap-2">
-                {[
-                  { level: 1, label: 'Easy', icon: Zap },
-                  { level: 2, label: 'Medium', icon: Cpu },
-                  { level: 3, label: 'Hard', icon: AlertCircle },
-                ].map(({ level, label, icon: Icon }) => (
+                {[1, 2, 3].map((level) => (
                   <Button
                     key={level}
-                    onClick={() => setAiLevel(level as StockfishLevel)}
+                    onClick={() => setAiLevel(level as ChessLevel)}
+                    disabled={isAIThinking || isEngineLoading}
                     variant={aiLevel === level ? 'default' : 'outline'}
-                    className={aiLevel === level ? 'bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-900/20' : 'bg-background/50 hover:bg-background/80'}
-                    type="button"
-                    disabled={isStockfishLoading || isAIThinking || gameState.moveCount > 0}
-                    title={gameState.moveCount > 0 ? "Cannot change difficulty mid-game" : ""}
+                    className={
+                      aiLevel === level
+                        ? 'bg-blue-600 hover:bg-blue-700'
+                        : 'border-slate-600 text-slate-300'
+                    }
                   >
-                    <Icon className="h-4 w-4 mb-1" />
-                    <span className="text-xs">{label}</span>
+                    {level === 1 ? 'Easy' : level === 2 ? 'Med' : 'Hard'}
                   </Button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </Card>
 
-          <MoveHistory pgn={game?.pgn() || ''} />
+            {/* Game info */}
+            <Card className="bg-slate-800 border-slate-700 p-4">
+              <h3 className="text-sm font-semibold text-white mb-3">Game Info</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Turn:</span>
+                  <span className="text-white font-medium">
+                    {gameState.currentTurn === 'white' ? '♔ White' : '♚ Black'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Moves:</span>
+                  <span className="text-white font-medium">{gameState.moveCount}</span>
+                </div>
+                {isGameOver().isOver && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Status:</span>
+                    <span className="text-green-400 font-medium">Finished</span>
+                  </div>
+                )}
+              </div>
+            </Card>
 
-          <GameControls
-            onResign={() => {
-              // TODO
-            }}
-            onNewGame={() => {
-              setIsAIThinking(false)
-              resetGame()
-            }}
-            onOfferDraw={() => {
-              // TODO
-            }}
-            disabled={isAIThinking || isStockfishLoading}
-          />
-        </aside>
+            {/* Move history */}
+            <Card className="bg-slate-800 border-slate-700 p-4 flex-1">
+              <h3 className="text-sm font-semibold text-white mb-3">Moves</h3>
+              <div className="bg-slate-900 rounded p-3 max-h-64 overflow-y-auto">
+                <p className="text-xs text-slate-400 font-mono break-words">
+                  {game?.pgn() || 'No moves yet'}
+                </p>
+              </div>
+            </Card>
+
+            {/* Controls */}
+            <div className="space-y-2">
+              <Button
+                onClick={() => router.push('/play')}
+                variant="outline"
+                className="w-full border-slate-600 text-slate-300"
+              >
+                Back to Menu
+              </Button>
+              {isGameOver().isOver && (
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  New Game
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -73,7 +73,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-6 w-full sm:w-auto">
               <Link
-                href="/play"
+                href="/history"
                 className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 rounded-full px-10 py-5 text-lg sm:text-xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-emerald-500/40"
               >
                 Analyze replays <ArrowRight className="ml-3 w-6 h-6" />

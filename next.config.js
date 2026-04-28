@@ -3,7 +3,9 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // Only apply COOP/COEP on play pages where Stockfish may need them.
+        // Applying globally breaks Supabase auth and cross-origin API calls.
+        source: '/play/:path*',
         headers: [
           {
             key: 'Cross-Origin-Embedder-Policy',

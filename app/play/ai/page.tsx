@@ -1,20 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ChessBoard } from '@/components/board/chess-board'
-import { MoveHistory } from '@/components/board/move-history'
-import { GameControls } from '@/components/board/game-controls'
 import { useChessGame } from '@/hooks/useChessGame'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, BarChart3 } from 'lucide-react'
 import type { ChessLevel } from '@/hooks/useChessGame'
 
 export default function AIPlayPage() {
   const router = useRouter()
   const [aiLevel, setAiLevel] = useState<ChessLevel>(2)
   const [isAIThinking, setIsAIThinking] = useState(false)
+  const [savedGameId, setSavedGameId] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const hasSavedRef = useRef(false)
 
   const {
     game,
@@ -68,6 +70,53 @@ export default function AIPlayPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentTurn, isEngineLoading])
+
+  // Save game to DB when it finishes
+  const saveGame = useCallback(async () => {
+    if (hasSavedRef.current || !isGameOver().isOver) return
+    hasSavedRef.current = true
+    setIsSaving(true)
+
+    try {
+      const pgn = game.pgn()
+      const result = gameState.result || 'draw'
+
+      const res = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pgn,
+          result,
+          mode: 'ai',
+          white_username: 'Player',
+          black_username: `AI (Level ${aiLevel})`,
+          total_moves: gameState.moveCount,
+          ai_level: aiLevel,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setSavedGameId(data.id)
+        console.log('[AI Play] Game saved with id:', data.id)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        console.error('[AI Play] Failed to save game:', err)
+        hasSavedRef.current = false // allow retry
+      }
+    } catch (err) {
+      console.error('[AI Play] Save error:', err)
+      hasSavedRef.current = false
+    } finally {
+      setIsSaving(false)
+    }
+  }, [game, gameState.result, gameState.moveCount, aiLevel, isGameOver])
+
+  useEffect(() => {
+    if (isGameOver().isOver && !hasSavedRef.current) {
+      saveGame()
+    }
+  }, [isGameOver, saveGame])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-8">
@@ -189,12 +238,28 @@ export default function AIPlayPage() {
                 Back to Menu
               </Button>
               {isGameOver().isOver && (
-                <Button
-                  onClick={() => window.location.reload()}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  New Game
-                </Button>
+                <>
+                  {savedGameId && (
+                    <Link href={`/analysis/${savedGameId}`} className="block">
+                      <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Analyze Replay
+                      </Button>
+                    </Link>
+                  )}
+                  {isSaving && (
+                    <Button disabled className="w-full bg-slate-700 text-slate-400">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving game...
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => window.location.reload()}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    New Game
+                  </Button>
+                </>
               )}
             </div>
           </div>

@@ -22,36 +22,43 @@ export interface ProfileRow {
 
 export interface GameRow {
   id: string
-  white_player_id: string | null
-  black_player_id: string | null
+  white_id: string | null
+  black_id: string | null
+  white_username: string
+  black_username: string
   pgn: string
-  mode: GameModeDb
   result: GameResultDb | null
+  mode: GameModeDb
+  ai_level: number | null
+  room_id: string | null
+  total_moves: number
+  duration_seconds: number | null
+  time_control: string | null
+  opening_name: string | null
   metadata: Json | null
   created_at: string
-  updated_at: string
+  finished_at: string | null
 }
 
 export interface AnalysisRow {
   id: string
   game_id: string
-  summary: string
-  accuracy_white: number
-  accuracy_black: number
-  mistakes: Json
+  moves: Json
+  summary: string | null
+  accuracy: Json | null
+  model_used: string | null
   created_at: string
-  updated_at: string
 }
 
 export interface RoomRow {
   id: string
   host_id: string | null
   guest_id: string | null
+  game_id: string | null
   status: RoomStatusDb
-  fen: string
-  pgn: string
+  host_color: string
   created_at: string
-  updated_at: string
+  expires_at: string
 }
 
 export interface Database {
@@ -64,18 +71,18 @@ export interface Database {
       }
       games: {
         Row: GameRow
-        Insert: Omit<GameRow, 'created_at' | 'updated_at'>
-        Update: Partial<Omit<GameRow, 'id' | 'created_at' | 'updated_at'>>
+        Insert: Omit<GameRow, 'id' | 'created_at'>
+        Update: Partial<Omit<GameRow, 'id' | 'created_at'>>
       }
       analyses: {
         Row: AnalysisRow
-        Insert: Omit<AnalysisRow, 'created_at' | 'updated_at'>
-        Update: Partial<Omit<AnalysisRow, 'id' | 'created_at' | 'updated_at'>>
+        Insert: Omit<AnalysisRow, 'id' | 'created_at'>
+        Update: Partial<Omit<AnalysisRow, 'id' | 'created_at'>>
       }
       rooms: {
         Row: RoomRow
-        Insert: Omit<RoomRow, 'created_at' | 'updated_at'>
-        Update: Partial<Omit<RoomRow, 'id' | 'created_at' | 'updated_at'>>
+        Insert: Omit<RoomRow, 'created_at' | 'expires_at'>
+        Update: Partial<Omit<RoomRow, 'id' | 'created_at' | 'expires_at'>>
       }
     }
     Views: Record<string, never>

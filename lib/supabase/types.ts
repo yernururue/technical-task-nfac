@@ -13,3 +13,4 @@ export type Profile = ProfileRow
 export type Game = GameRow
 export type Analysis = AnalysisRow
 export type Room = RoomRow
+

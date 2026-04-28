@@ -1,7 +1,9 @@
 'use client'
 
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
-import { Users, User, Share, Crown } from 'lucide-react'
+import { Users, User, Share, Crown, BarChart3, Loader2 } from 'lucide-react'
 
 import { ChessBoard } from '@/components/board/chess-board'
 import { GameControls } from '@/components/board/game-controls'
@@ -21,13 +23,64 @@ function getResultLabel(result: GameResult | null): string {
 }
 
 export default function LocalPlayPage(): JSX.Element {
-  const { game, gameState, makeMove, resetGame, resignGame, getPGN } = useChessGame('local')
+  const { game, gameState, makeMove, resetGame, resignGame, getPGN, isGameOver } = useChessGame('local')
+
+  const [savedGameId, setSavedGameId] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const hasSavedRef = useRef(false)
+
+  // Save game to DB when it finishes
+  const saveGame = useCallback(async () => {
+    if (hasSavedRef.current) return
+    hasSavedRef.current = true
+    setIsSaving(true)
+
+    try {
+      const pgn = game.pgn()
+      const result = gameState.result || 'draw'
+
+      const res = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pgn,
+          result,
+          mode: 'local',
+          white_username: gameState.players.white.username,
+          black_username: gameState.players.black.username,
+          total_moves: gameState.moveCount,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setSavedGameId(data.id)
+        toast.success('Game saved!')
+        console.log('[Local Play] Game saved with id:', data.id)
+      } else {
+        const err = await res.json().catch(() => ({}))
+        console.error('[Local Play] Failed to save game:', err)
+        toast.error('Failed to save game')
+        hasSavedRef.current = false
+      }
+    } catch (err) {
+      console.error('[Local Play] Save error:', err)
+      toast.error('Failed to save game')
+      hasSavedRef.current = false
+    } finally {
+      setIsSaving(false)
+    }
+  }, [game, gameState.result, gameState.moveCount, gameState.players])
+
+  // Detect game end and trigger save
+  useEffect(() => {
+    if (gameState.status === 'finished' && !hasSavedRef.current) {
+      saveGame()
+    }
+  }, [gameState.status, saveGame])
 
   const handleGameEnd = (pgn: string, result: GameResult): void => {
     toast.success(`Game ended: ${getResultLabel(result)}`)
-    if (pgn.trim().length > 0) {
-      toast.message('PGN saved in session')
-    }
   }
 
   const handleResign = (): void => {
@@ -114,6 +167,28 @@ export default function LocalPlayPage(): JSX.Element {
             onResign={handleResign}
             disabled={gameState.result !== 'in_progress'}
           />
+
+          {/* Analyze Replay button — shown after game is saved */}
+          {gameState.status === 'finished' && (
+            <Card className="glass-card border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
+              <CardContent className="pt-4 space-y-2">
+                {savedGameId && (
+                  <Link href={`/analysis/${savedGameId}`} className="block">
+                    <Button className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-lg shadow-cyan-500/20">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Analyze Replay
+                    </Button>
+                  </Link>
+                )}
+                {isSaving && (
+                  <Button disabled className="w-full">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving game...
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="glass-card border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
             <CardHeader className="pb-3 pt-4 flex flex-row items-center justify-between space-y-0">

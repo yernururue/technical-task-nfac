@@ -1,61 +1,41 @@
 'use client'
 
+import { Handshake, Flag, RotateCcw } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { RotateCcw, Flag, Handshake, Settings2 } from 'lucide-react'
 
 interface GameControlsProps {
   onNewGame: () => void
-  onOfferDraw?: () => void
-  onResign?: () => void
+  onResign: () => void
+  onOfferDraw: () => void
   disabled?: boolean
 }
 
 export function GameControls({
   onNewGame,
-  onOfferDraw,
   onResign,
+  onOfferDraw,
   disabled = false,
-}: GameControlsProps) {
+}: GameControlsProps): JSX.Element {
   return (
-    <Card className="glass border-border bg-card/60 shadow-xl backdrop-blur-xl">
-      <CardHeader className="pb-3 pt-4 flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
-          <Settings2 className="h-4 w-4 text-primary" />
-          Controls
-        </CardTitle>
+    <Card className="glass-card border-border/50 bg-background/60 shadow-xl backdrop-blur-xl">
+      <CardHeader className="pb-3 pt-4">
+        <CardTitle className="text-lg tracking-tight">Game Controls</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2 border-border text-foreground hover:bg-secondary"
-          onClick={onNewGame}
-        >
-          <RotateCcw className="h-4 w-4" />
+      <CardContent className="grid grid-cols-2 gap-2">
+        <Button onClick={onNewGame} type="button" variant="default" disabled={disabled} className="col-span-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+          <RotateCcw className="mr-2 h-4 w-4" />
           New Game
         </Button>
-        {onOfferDraw && (
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 border-border text-foreground hover:bg-secondary"
-            onClick={onOfferDraw}
-            disabled={disabled}
-          >
-            <Handshake className="h-4 w-4" />
-            Offer Draw
-          </Button>
-        )}
-        {onResign && (
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
-            onClick={onResign}
-            disabled={disabled}
-          >
-            <Flag className="h-4 w-4" />
-            Resign
-          </Button>
-        )}
+        <Button onClick={onResign} type="button" variant="destructive" disabled={disabled} className="shadow-lg shadow-destructive/20 hover:shadow-destructive/40 transition-shadow">
+          <Flag className="mr-2 h-4 w-4" />
+          Resign
+        </Button>
+        <Button onClick={onOfferDraw} type="button" variant="outline" disabled={disabled} className="border-border/50 bg-background/50 hover:bg-background/80 shadow-sm">
+          <Handshake className="mr-2 h-4 w-4 text-amber-500" />
+          Draw
+        </Button>
       </CardContent>
     </Card>
   )

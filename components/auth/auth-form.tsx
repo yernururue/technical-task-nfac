@@ -3,143 +3,193 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Lock, User } from 'lucide-react'
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 
 interface AuthFormProps {
   type: 'login' | 'signup'
 }
 
 export function AuthForm({ type }: AuthFormProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-
-  const isLogin = type === 'login'
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setSuccess(null)
     setLoading(true)
 
-    // Placeholder - will be connected to Supabase auth when integration is added
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      toast.success(isLogin ? 'Logged in successfully!' : 'Account created successfully!')
-      router.push('/play')
-    } catch {
-      toast.error('Authentication failed. Please try again.')
+      if (type === 'signup') {
+        // SIGNUP
+        if (!email || !password || !username) {
+          throw new Error('All fields are required')
+        }
+
+        if (password.length < 6) {
+          throw new Error('Password must be at least 6 characters')
+        }
+
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username: username,
+            },
+          },
+        })
+
+        if (signupError) {
+          throw new Error(signupError.message)
+        }
+
+        if (!data.user) {
+          throw new Error('Signup failed - no user returned')
+        }
+
+        setSuccess('✓ Account created! Logging you in...')
+        setTimeout(() => {
+          router.push('/play')
+        }, 1500)
+      } else {
+        // LOGIN
+        if (!email || !password) {
+          throw new Error('Email and password are required')
+        }
+
+        const { data, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (loginError) {
+          throw new Error(loginError.message)
+        }
+
+        if (!data.user) {
+          throw new Error('Login failed - no user returned')
+        }
+
+        setSuccess('✓ Logged in! Redirecting...')
+        setTimeout(() => {
+          router.push('/play')
+        }, 1000)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong'
+      setError(message)
+      console.error('Auth error:', message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background pt-20 flex items-center justify-center px-4">
-      <Card className="w-full max-w-md glass border-border bg-card/60 shadow-2xl backdrop-blur-xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-background flex items-center justify-center font-black text-2xl shadow-lg shadow-emerald-500/20">
-              C
-            </div>
-          </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            {isLogin ? 'Welcome back' : 'Create an account'}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl text-white">
+            {type === 'login' ? '♟️ Welcome Back' : '♟️ Join ChessMind'}
           </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {isLogin
-              ? 'Enter your credentials to access your account'
-              : 'Sign up to start your chess journey'}
+          <CardDescription className="text-slate-400">
+            {type === 'login'
+              ? 'Login to your account and start playing'
+              : 'Create an account to save your games'}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-foreground">
-                  Username
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="chessmind"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground"
-                    required
-                  />
+            {/* Error Alert */}
+            {error && (
+              <div className="flex gap-3 p-4 bg-red-900/20 border border-red-700 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-200">{error}</p>
                 </div>
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground"
-                  required
-                />
+
+            {/* Success Alert */}
+            {success && (
+              <div className="flex gap-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-200">{success}</p>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border text-foreground placeholder:text-muted-foreground"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
+            )}
+
+            {/* Username (signup only) */}
+            {type === 'signup' && (
+              <Input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={loading}
+                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                required
+              />
+            )}
+
+            {/* Email */}
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              required
+            />
+
+            {/* Password */}
+            <Input
+              type="password"
+              placeholder={type === 'signup' ? 'Password (min 6 chars)' : 'Password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              minLength={6}
+              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              required
+            />
+
+            {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold hover:from-emerald-600 hover:to-teal-700"
               disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10"
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {type === 'login' ? 'Login' : 'Create Account'}
             </Button>
-          </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {isLogin ? (
-              <>
-                {"Don't have an account? "}
-                <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-                  Sign up
+            {/* Link to other form */}
+            <div className="text-center">
+              <p className="text-sm text-slate-400">
+                {type === 'login' ? "Don't have an account?" : 'Already have an account?'}
+                <Link
+                  href={type === 'login' ? '/auth/signup' : '/auth/login'}
+                  className="text-blue-400 hover:text-blue-300 ml-1 font-medium"
+                >
+                  {type === 'login' ? 'Sign up' : 'Login'}
                 </Link>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <Link href="/auth/login" className="text-primary hover:underline font-medium">
-                  Sign in
-                </Link>
-              </>
-            )}
-          </div>
+              </p>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

@@ -3,9 +3,9 @@
 import { toast } from 'sonner'
 import { Users, User, Share, Crown } from 'lucide-react'
 
-import { ChessBoard } from '@/components/board/ChessBoard'
-import { GameControls } from '@/components/board/GameControls'
-import { MoveHistory } from '@/components/board/MoveHistory'
+import { ChessBoard } from '@/components/board/chess-board'
+import { GameControls } from '@/components/board/game-controls'
+import { MoveHistory } from '@/components/board/move-history'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

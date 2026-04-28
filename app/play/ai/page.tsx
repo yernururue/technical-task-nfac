@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChessBoard } from '@/components/board/ChessBoard'
-import { MoveHistory } from '@/components/board/MoveHistory'
-import { GameControls } from '@/components/board/GameControls'
+import { ChessBoard } from '@/components/board/chess-board'
+import { MoveHistory } from '@/components/board/move-history'
+import { GameControls } from '@/components/board/game-controls'
 import { useChessGame } from '@/hooks/useChessGame'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'

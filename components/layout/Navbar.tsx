@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,147 +11,146 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User, Settings, BarChart3, Menu } from 'lucide-react'
+import { Menu, X, User, LogOut, Settings, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/history', label: 'Replays' },
+  { href: '/play', label: 'Play' },
+]
+
 export function Navbar() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const router = useRouter()
   const pathname = usePathname()
-  const supabase = createClient()
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getSession()
-        setUser(data.session?.user || null)
-      } catch (err) {
-        console.error('Auth check failed:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null)
-    })
-
-    return () => subscription?.unsubscribe()
-  }, [supabase])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    router.push('/')
-  }
+  
+  // Placeholder user state - will be connected to Supabase auth
+  const user = null
+  const loading = false
 
   const isActive = (path: string) => pathname === path
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 backdrop-blur-xl bg-opacity-80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="text-3xl">♟️</div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-cyan-300 transition">
-              ChessMind
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link href="/play">
-              <Button
-                variant="ghost"
-                className={cn(
-                  'text-slate-400 hover:text-white transition',
-                  isActive('/play') && 'text-white bg-slate-800'
-                )}
-              >
-                Play
-              </Button>
-            </Link>
-            {user && (
-              <Link href="/history">
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    'text-slate-400 hover:text-white transition',
-                    isActive('/history') && 'text-white bg-slate-800'
-                  )}
-                >
-                  History
-                </Button>
-              </Link>
-            )}
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-background flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+            C
           </div>
+          <span className="text-foreground font-extrabold text-xl tracking-tight">ChessMind</span>
+        </Link>
 
-          {/* Right - Auth Section */}
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-semibold">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'transition-colors hover:text-primary',
+                isActive(link.href) ? 'text-foreground' : 'text-muted-foreground'
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Right Side - Auth */}
+        <div className="hidden md:flex items-center gap-4">
           {!loading && (
-            <div className="flex items-center gap-4">
+            <>
               {user ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white text-slate-300 h-9 px-4 py-2 outline-none"
-                  >
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
                       <User className="w-4 h-4" />
-                      <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
+                      <span>Account</span>
+                    </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
-                    <DropdownMenuItem className="text-slate-400 cursor-default">
-                      <User className="w-4 h-4 mr-2" />
-                      <span>{user.email}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-700" />
-                    <DropdownMenuItem
-                      onClick={() => router.push('/history')}
-                      className="text-slate-300 hover:text-white cursor-pointer"
-                    >
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem>
                       <BarChart3 className="w-4 h-4 mr-2" />
                       <span>Game History</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-slate-300 hover:text-white cursor-pointer">
+                    <DropdownMenuItem>
                       <Settings className="w-4 h-4 mr-2" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-slate-700" />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="text-red-400 hover:text-red-300 cursor-pointer"
-                    >
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Logout</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex gap-2">
+                <>
                   <Link href="/auth/login">
-                    <Button
-                      variant="ghost"
-                      className="text-slate-300 hover:text-white hover:bg-slate-800"
-                    >
+                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
                       Login
                     </Button>
                   </Link>
-                  <Link href="/auth/signup">
-                    <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-blue-500/50 transition">
-                      Sign Up
+                  <Link href="/play">
+                    <Button className="bg-foreground text-background hover:bg-foreground/90 font-bold rounded-xl px-6">
+                      Play Now
                     </Button>
                   </Link>
-                </div>
+                </>
               )}
-            </div>
+            </>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
+          <div className="px-6 py-4 space-y-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'block py-2 text-base font-semibold transition-colors',
+                  isActive(link.href) ? 'text-foreground' : 'text-muted-foreground'
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="pt-4 border-t border-border space-y-2">
+              {user ? (
+                <Button variant="outline" className="w-full justify-start gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              ) : (
+                <>
+                  <Link href="/auth/login" className="block">
+                    <Button variant="outline" className="w-full">Login</Button>
+                  </Link>
+                  <Link href="/play" className="block">
+                    <Button className="w-full bg-primary text-primary-foreground">Play Now</Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

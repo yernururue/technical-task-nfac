@@ -72,16 +72,23 @@ export default function LocalPlayPage(): JSX.Element {
     }
   }, [game, gameState.result, gameState.moveCount, gameState.players])
 
-  // Detect game end and trigger save
+  const handleGameEnd = useCallback((pgn: string, result: GameResult): void => {
+    console.log('[Local Play] handleGameEnd triggered', { result, pgnLength: pgn.length })
+    toast.success(`Game ended: ${getResultLabel(result)}`)
+    
+    if (!hasSavedRef.current) {
+      console.log('[Local Play] Triggering saveGame from handleGameEnd')
+      saveGame()
+    }
+  }, [saveGame])
+
+  // Also trigger save if status changes to finished (backup for resignation)
   useEffect(() => {
     if (gameState.status === 'finished' && !hasSavedRef.current) {
+      console.log('[Local Play] Triggering saveGame from status Effect')
       saveGame()
     }
   }, [gameState.status, saveGame])
-
-  const handleGameEnd = (pgn: string, result: GameResult): void => {
-    toast.success(`Game ended: ${getResultLabel(result)}`)
-  }
 
   const handleResign = (): void => {
     resignGame(gameState.currentTurn)

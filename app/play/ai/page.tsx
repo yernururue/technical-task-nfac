@@ -73,13 +73,15 @@ export default function AIPlayPage() {
 
   // Save game to DB when it finishes
   const saveGame = useCallback(async () => {
-    if (hasSavedRef.current || !isGameOver().isOver) return
+    if (hasSavedRef.current) return
     hasSavedRef.current = true
     setIsSaving(true)
 
     try {
       const pgn = game.pgn()
       const result = gameState.result || 'draw'
+
+      console.log('[AI Play] Triggering save to /api/games...', { result, pgnLength: pgn.length })
 
       const res = await fetch('/api/games', {
         method: 'POST',
@@ -98,25 +100,31 @@ export default function AIPlayPage() {
       if (res.ok) {
         const data = await res.json()
         setSavedGameId(data.id)
-        console.log('[AI Play] Game saved with id:', data.id)
+        console.log('[AI Play] Game saved successfully:', data.id)
       } else {
         const err = await res.json().catch(() => ({}))
-        console.error('[AI Play] Failed to save game:', err)
+        console.error('[AI Play] API error saving game:', err)
         hasSavedRef.current = false // allow retry
       }
     } catch (err) {
-      console.error('[AI Play] Save error:', err)
+      console.error('[AI Play] Network error saving game:', err)
       hasSavedRef.current = false
     } finally {
       setIsSaving(false)
     }
-  }, [game, gameState.result, gameState.moveCount, aiLevel, isGameOver])
+  }, [game, gameState.result, gameState.moveCount, aiLevel])
 
+  const handleGameEnd = useCallback(() => {
+    console.log('[AI Play] Board detected game end, calling saveGame...')
+    saveGame()
+  }, [saveGame])
+
+  // Also trigger save if status changes to finished (backup for resignation)
   useEffect(() => {
-    if (isGameOver().isOver && !hasSavedRef.current) {
+    if (gameState.status === 'finished' && !hasSavedRef.current) {
       saveGame()
     }
-  }, [isGameOver, saveGame])
+  }, [gameState.status, saveGame])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-8">
@@ -164,6 +172,7 @@ export default function AIPlayPage() {
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-2xl">
               <ChessBoard
                 gameMode="ai"
+                onGameEnd={handleGameEnd}
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
                 disabled={isAIThinking || gameState.currentTurn === 'black' || isEngineLoading}

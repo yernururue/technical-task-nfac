@@ -43,29 +43,31 @@ export function ChessBoard({
   }, [currentState.pgn, currentState.result, currentState.status, onGameEnd])
 
   return (
-    <section className="w-full max-w-[560px]">
-      <Chessboard
-        id="chessmind-board"
-        position={currentState.fen || game.fen()}
-        boardWidth={boardWidth}
-        customBoardStyle={{
-          borderRadius: '0.75rem',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-        }}
-        customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
-        customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
-        arePiecesDraggable={!disabled}
-        onPieceDrop={(sourceSquare, targetSquare) => {
-          if (disabled) {
-            return false
-          }
-          const result = moveExecutor(sourceSquare, targetSquare, 'q')
-          if (!result.success && result.error) {
-            toast.error(result.error)
-          }
-          return result.success
-        }}
-      />
-    </section>
+    <div className="w-full max-w-[560px]">
+      <div className="relative w-full aspect-square">
+        <Chessboard
+          id="chessmind-board"
+          position={currentState.fen || game.fen()}
+          boardWidth={boardWidth}
+          customBoardStyle={{
+            borderRadius: '0.75rem',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          }}
+          customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
+          customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
+          arePiecesDraggable={!disabled}
+          onPieceDrop={(sourceSquare, targetSquare) => {
+            if (disabled) {
+              return false
+            }
+            const result = moveExecutor(sourceSquare, targetSquare, 'q')
+            if (!result.success && result.error) {
+              toast.error(result.error)
+            }
+            return result.success
+          }}
+        />
+      </div>
+    </div>
   )
 }

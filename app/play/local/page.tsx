@@ -39,7 +39,7 @@ export default function LocalPlayPage(): JSX.Element {
     <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 relative">
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       
-      <div className="container relative mx-auto flex flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start max-w-7xl z-10 animate-slide-up">
+      <div className="container relative mx-auto flex flex-col gap-8 px-4 py-8 lg:flex-row lg:items-start max-w-7xl z-10">
         
         <div className="flex-1 flex flex-col items-center lg:items-end justify-center w-full">
           <div className="w-full max-w-[640px] flex flex-col gap-4">

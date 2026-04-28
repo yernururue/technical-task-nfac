@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,8 +12,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Menu, X, User, LogOut, Settings, BarChart3 } from 'lucide-react'
+import { Menu, X, User, LogOut, Settings, BarChart3, UserCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ProfileDialog } from './profile-dialog'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -23,10 +25,36 @@ const navLinks = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
   
-  // Placeholder user state - will be connected to Supabase auth
-  const user = null
-  const loading = false
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+    }
+
+    fetchUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.refresh()
+  }
 
   const isActive = (path: string) => pathname === path
 
@@ -64,22 +92,25 @@ export function Navbar() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-                      <User className="w-4 h-4" />
-                      <span>Account</span>
+                    <Button variant="ghost" className="gap-2 h-12 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center border border-white/10">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="font-bold">{user.email?.split('@')[0]}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem>
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      <span>Game History</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="w-4 h-4 mr-2" />
-                      <span>Settings</span>
+                  <DropdownMenuContent align="end" className="w-64 p-2 bg-card/95 backdrop-blur-xl border-border rounded-2xl shadow-2xl">
+                    <div className="px-3 py-2 mb-2">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Account</p>
+                      <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
+                    </div>
+                    <DropdownMenuSeparator className="bg-border/50" />
+                    <DropdownMenuItem className="rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer py-3" onClick={() => setProfileOpen(true)}>
+                      <UserCircle className="w-4 h-4 mr-3" />
+                      <span className="font-semibold">My Profile</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Logout</span>
                     </DropdownMenuItem>
@@ -133,10 +164,23 @@ export function Navbar() {
             ))}
             <div className="pt-4 border-t border-border space-y-2">
               {user ? (
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Button>
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-2"
+                    onClick={() => {
+                      setProfileOpen(true)
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    <UserCircle className="w-4 h-4" />
+                    Profile
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <>
                   <Link href="/auth/login" className="block">
@@ -150,6 +194,14 @@ export function Navbar() {
             </div>
           </div>
         </div>
+      )}
+
+      {user && (
+        <ProfileDialog 
+          userId={user.id} 
+          open={profileOpen} 
+          onOpenChange={setProfileOpen} 
+        />
       )}
     </nav>
   )

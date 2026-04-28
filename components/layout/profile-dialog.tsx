@@ -16,6 +16,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
+import type { Database } from '@/types/supabase'
 
 interface Profile {
   username: string
@@ -43,7 +44,7 @@ export function ProfileDialog({ userId, open, onOpenChange }: ProfileDialogProps
   const [editedUsername, setEditedUsername] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   
-  const supabase = createClient()
+  const supabase = createClient() as any
 
   useEffect(() => {
     if (!open || !userId) return

@@ -8,7 +8,13 @@ export type RoomStatusDb = 'waiting' | 'active' | 'finished'
 export interface ProfileRow {
   id: string
   username: string
+  avatar_url: string | null
   rating: number
+  games_played: number
+  wins: number
+  losses: number
+  draws: number
+  is_pro: boolean
   preferences: Json | null
   created_at: string
   updated_at: string

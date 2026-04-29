@@ -8,7 +8,7 @@ import { useChessGame } from '@/hooks/useChessGame'
 import type { GameResult, GameState } from '@/types/game'
 
 interface ChessBoardProps {
-  gameMode?: 'local' | 'ai'
+  gameMode?: 'local' | 'ai' | 'multiplayer'
   onGameEnd?: (pgn: string, result: GameResult) => void
   gameStateOverride?: GameState
   makeMoveOverride?: (fromSquare: string, toSquare: string, promotion?: 'q' | 'r' | 'b' | 'n') => {

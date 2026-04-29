@@ -119,6 +119,8 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
+    let profileChannel: any = null
+
     const initProfile = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       
@@ -127,12 +129,13 @@ export default function ProfilePage() {
         return
       }
 
-      setUserId(session.user.id)
+      const userId = session.user.id
+      setUserId(userId)
 
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', userId)
         .single()
 
       if (data) {
@@ -146,11 +149,38 @@ export default function ProfilePage() {
         const prefs = typedData.preferences || {}
         setBoardTheme(prefs.boardTheme || 'default')
         setPieceStyle(prefs.pieceStyle || 'default')
+
+        // Subscribe to realtime changes for this specific profile
+        profileChannel = supabase
+          .channel(`profile-updates-${userId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${userId}`,
+            },
+            (payload) => {
+              console.log('[Profile Realtime] Received update:', payload.new)
+              const updatedProfile = payload.new as Profile
+              setProfile(updatedProfile)
+              // Only update form fields if they aren't currently being edited? 
+              // Actually, usually it's fine to just update the rating/stats display
+            }
+          )
+          .subscribe()
       }
       setLoading(false)
     }
 
     initProfile()
+
+    return () => {
+      if (profileChannel) {
+        supabase.removeChannel(profileChannel)
+      }
+    }
   }, [supabase, router])
 
   const handleSave = async () => {

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { User, Trophy, Target, Calendar, Edit2, Save, SwatchBook, MapPin, Map, Image as ImageIcon, BarChart3, Settings } from 'lucide-react'
+import { User, Trophy, Target, Calendar, Edit2, Save, SwatchBook, MapPin, Map, Image as ImageIcon, BarChart3, Settings, LogOut, Upload, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -54,6 +54,68 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [boardTheme, setBoardTheme] = useState('default')
   const [pieceStyle, setPieceStyle] = useState('default')
+
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !userId) return
+    const file = e.target.files[0]
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file')
+      return
+    }
+
+    // Validate size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size should be less than 2MB')
+      return
+    }
+
+    setUploadingAvatar(true)
+    const fileExt = file.name.split('.').pop()
+    const filePath = `${userId}-${Math.random()}.${fileExt}`
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      setAvatarUrl(publicUrl)
+      
+      // Auto-save to profile
+      if (profile) {
+        const { error: updateError } = await (supabase.from('profiles') as any)
+          .update({ avatar_url: publicUrl })
+          .eq('id', userId)
+          
+        if (updateError) throw updateError
+        
+        setProfile({ ...profile, avatar_url: publicUrl })
+      }
+
+      toast.success('Avatar uploaded successfully')
+    } catch (err: any) {
+      console.error('[Avatar Upload]', err)
+      toast.error(err.message || 'Error uploading avatar')
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
 
   useEffect(() => {
     const initProfile = async () => {
@@ -157,13 +219,23 @@ export default function ProfilePage() {
   return (
     <div className="pt-28 pb-12 px-6 max-w-7xl mx-auto space-y-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-card/50 backdrop-blur-xl p-8 rounded-3xl border border-border">
-        <div className="w-32 h-32 rounded-[2rem] bg-secondary flex items-center justify-center border-4 border-card overflow-hidden shrink-0">
+      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-card/50 backdrop-blur-xl p-8 rounded-3xl border border-border relative">
+        <Button variant="ghost" onClick={handleLogout} className="absolute top-4 right-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl">
+          <LogOut className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Logout</span>
+        </Button>
+        <div 
+          className="w-32 h-32 rounded-[2rem] bg-secondary flex items-center justify-center border-4 border-card overflow-hidden shrink-0 relative group cursor-pointer shadow-lg" 
+          onClick={() => fileInputRef.current?.click()}
+        >
           {avatarUrl ? (
-            <img src={avatarUrl} alt={username} className="w-full h-full object-cover" />
+            <img src={avatarUrl} alt={username} className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" />
           ) : (
-            <User className="w-16 h-16 text-muted-foreground" />
+            <User className="w-16 h-16 text-muted-foreground group-hover:opacity-40 transition-opacity" />
           )}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+            {uploadingAvatar ? <Loader2 className="w-8 h-8 animate-spin text-white" /> : <Upload className="w-8 h-8 text-white drop-shadow-md" />}
+          </div>
+          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
         </div>
         <div className="flex-1 text-center md:text-left space-y-3">
           <h1 className="text-4xl font-black text-foreground tracking-tight">{username || 'Player'}</h1>
@@ -290,13 +362,18 @@ export default function ProfilePage() {
                 <Label htmlFor="avatarUrl" className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                   <ImageIcon className="w-3 h-3" /> Avatar URL
                 </Label>
-                <Input
-                  id="avatarUrl"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="bg-secondary/50 h-12 rounded-xl"
-                  placeholder="https://example.com/avatar.jpg"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="avatarUrl"
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    className="bg-secondary/50 h-12 rounded-xl flex-1"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                  <Button variant="outline" className="h-12 px-6 rounded-xl" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="w-4 h-4 mr-2" /> Upload
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

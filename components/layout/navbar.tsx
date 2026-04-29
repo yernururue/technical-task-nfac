@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Menu, X, User, LogOut, Settings, BarChart3, UserCircle } from 'lucide-react'
+import { Menu, X, User, Settings, BarChart3, UserCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
@@ -29,31 +29,44 @@ export function Navbar() {
   const supabase = createClient()
   
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      if (user) {
+        setUser(user)
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, rating, avatar_url')
+          .eq('id', user.id)
+          .single()
+        setProfile(profileData)
+      } else {
+        setUser(null)
+        setProfile(null)
+      }
       setLoading(false)
     }
 
     fetchUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+      if (session?.user) {
+        // Just re-fetch the whole thing to be safe, or wait for next reload
+        fetchUser()
+      } else {
+        setUser(null)
+        setProfile(null)
+        setLoading(false)
+      }
     })
 
     return () => {
       subscription.unsubscribe()
     }
   }, [supabase])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.refresh()
-  }
 
   const isActive = (path: string) => pathname === path
 
@@ -89,27 +102,21 @@ export function Navbar() {
           {!loading && (
             <>
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="gap-2 h-12 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center border border-white/10">
+                <Link href="/profile" className="flex items-center">
+                  <Button variant="ghost" className="gap-2 h-12 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
                         <User className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="font-bold">{user.email?.split('@')[0]}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 p-2 bg-card/95 backdrop-blur-xl border-border rounded-2xl shadow-2xl">
-                    <div className="px-3 py-2 mb-2">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Account</p>
-                      <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
+                      )}
                     </div>
-                    <DropdownMenuSeparator className="bg-border/50" />
-                    <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <span className="font-bold">
+                      {profile?.username || user.email?.split('@')[0]}
+                      {profile?.rating ? ` (${profile.rating})` : ''}
+                    </span>
+                  </Button>
+                </Link>
               ) : (
                 <>
                   <Link href="/auth/login">
@@ -157,14 +164,7 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-4 border-t border-border space-y-2">
-              {user ? (
-                <>
-                  <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </Button>
-                </>
-              ) : (
+              {user ? null : (
                 <>
                   <Link href="/auth/login" className="block">
                     <Button variant="outline" className="w-full">Login</Button>

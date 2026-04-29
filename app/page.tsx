@@ -15,26 +15,26 @@ function SparkleIcon({ className }: { className?: string }) {
 const features = [
   {
     icon: Brain,
-    title: 'Best analysis',
-    description: 'Get deep insights into your games with our advanced AI coach. Understand every move.',
+    title: 'AI Coach (Free)',
+    description: 'Get deep insights into your games with our base AI model. Understand your mistakes without dry engine evaluations.',
     color: 'emerald',
   },
   {
     icon: Zap,
-    title: 'Less than 5 minutes',
-    description: 'Lightning-fast evaluations. Get your game analyzed in seconds, not hours.',
+    title: 'Deep LLM Insights (Pro)',
+    description: 'Unlock advanced Gemini 2.5 Flash analysis. Get personalized, human-like explanations for every critical blunder.',
     color: 'cyan',
   },
   {
     icon: Shield,
-    title: 'Non-essential',
-    description: 'Skip the noise. We focus only on critical mistakes and brilliant moves that matter.',
+    title: 'Brain Fitness Tracker (Coming Soon)',
+    description: 'Track your cognitive endurance. Our AI analyzes your game history to find out exactly when you lose focus and start blundering.',
     color: 'purple',
   },
   {
     icon: Target,
-    title: 'Totally free',
-    description: 'Access world-class chess analysis without hitting a paywall. Learn at your own pace.',
+    title: 'Web3 Tournaments (Planned)',
+    description: 'Compete in decentralized arenas. Join smart-contract-based tournaments and play for real prize pools on Solana.',
     color: 'blue',
   },
 ]

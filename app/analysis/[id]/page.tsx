@@ -302,36 +302,40 @@ export default function AnalysisPage() {
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {analyzing && (
-                  <div className="flex items-center gap-3 py-8 justify-center">
-                    <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
-                    <span className="text-sm text-slate-400">Analyzing your game...</span>
+              <CardContent className="min-h-[480px] flex flex-col justify-start">
+                {analyzing ? (
+                  <div className="flex flex-col items-center justify-center flex-1 space-y-4">
+                    <div className="relative">
+                      <div className="w-12 h-12 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin"></div>
+                      <BarChart3 className="w-5 h-5 text-cyan-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-white">Analyzing your game</p>
+                      <p className="text-xs text-slate-500 mt-1">Bot is calculating best moves...</p>
+                    </div>
                   </div>
-                )}
-
-                {analysis && !analyzing && (
-                  <div className="space-y-4">
+                ) : analysis ? (
+                  <div className="space-y-6 flex-1 animate-in fade-in duration-500">
                     {/* Summary */}
-                    <div className="p-3 bg-slate-900 rounded-lg border border-slate-700">
-                      <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">Summary</h4>
-                      <p className="text-sm text-slate-300 leading-relaxed">{analysis.summary}</p>
+                    <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-700/50">
+                      <h4 className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.2em] mb-2 opacity-80">Overview</h4>
+                      <p className="text-sm text-slate-300 leading-relaxed italic">"{analysis.summary}"</p>
                     </div>
 
                     {/* Mistakes */}
-                    {analysis.mistakes && analysis.mistakes.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">
-                          Key Mistakes ({analysis.mistakes.length})
-                        </h4>
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    <div className="flex flex-col flex-1">
+                      <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-[0.2em] mb-3 opacity-80">
+                        Critical Moments ({analysis.mistakes?.length || 0})
+                      </h4>
+                      {analysis.mistakes && analysis.mistakes.length > 0 ? (
+                        <div className="space-y-3 overflow-y-auto pr-1 custom-scrollbar max-h-[300px]">
                           {analysis.mistakes.map((mistake, idx) => (
-                            <div key={idx} className="p-3 bg-slate-900 rounded-lg border border-slate-700">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-bold text-white">{mistake.move}</span>
+                            <div key={idx} className="p-3 bg-slate-900/40 rounded-lg border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-white bg-slate-700 px-2 py-0.5 rounded">{mistake.move}</span>
                                 {mistake.better_move && (
-                                  <span className="text-xs text-emerald-400 font-mono">
-                                    Better: {mistake.better_move}
+                                  <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                                    → {mistake.better_move}
                                   </span>
                                 )}
                               </div>
@@ -339,22 +343,26 @@ export default function AnalysisPage() {
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {analysis.mistakes && analysis.mistakes.length === 0 && (
-                      <p className="text-sm text-emerald-400 py-4 text-center">
-                        Great game! No major mistakes found.
-                      </p>
-                    )}
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center border border-dashed border-slate-700 rounded-lg py-8">
+                          <p className="text-sm text-emerald-400">Great game! No major mistakes found.</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-
-                {!analysis && !analyzing && (
-                  <Button onClick={runAnalysis} className="w-full bg-cyan-600 hover:bg-cyan-700">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Run AI Analysis
-                  </Button>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                    <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
+                      <BarChart3 className="w-6 h-6 text-slate-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-400 mb-4">No analysis available for this game yet.</p>
+                      <Button onClick={runAnalysis} className="w-full bg-cyan-600 hover:bg-cyan-700 shadow-lg shadow-cyan-900/20">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Run AI Analysis
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>

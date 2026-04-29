@@ -218,11 +218,20 @@ export default function ProfilePage() {
 
   return (
     <div className="pt-28 pb-12 px-6 max-w-7xl mx-auto space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-card/50 backdrop-blur-xl p-8 rounded-3xl border border-border relative">
-        <Button variant="ghost" onClick={handleLogout} className="absolute top-4 right-4 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl">
-          <LogOut className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Logout</span>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-card/30 backdrop-blur-md p-6 rounded-3xl border border-border/50">
+        <h1 className="text-3xl font-black text-foreground tracking-tight">Profile Settings</h1>
+        <Button 
+          variant="ghost" 
+          onClick={handleLogout} 
+          className="text-destructive hover:text-white hover:bg-destructive transition-all rounded-xl h-11 px-6 font-bold flex items-center gap-2 group"
+        >
+          <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" /> 
+          Logout
         </Button>
+      </div>
+
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-card/50 backdrop-blur-xl p-8 rounded-3xl border border-border">
         <div 
           className="w-32 h-32 rounded-[2rem] bg-secondary flex items-center justify-center border-4 border-card overflow-hidden shrink-0 relative group cursor-pointer shadow-lg" 
           onClick={() => fileInputRef.current?.click()}

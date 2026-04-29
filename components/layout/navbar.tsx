@@ -19,6 +19,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/history', label: 'Replays' },
   { href: '/play', label: 'Play' },
+  { href: '/profile', label: 'Profile' },
 ]
 
 export function Navbar() {
@@ -103,13 +104,6 @@ export function Navbar() {
                       <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator className="bg-border/50" />
-                    <Link href="/profile">
-                      <DropdownMenuItem className="rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
-                        <UserCircle className="w-4 h-4 mr-3" />
-                        <span className="font-semibold">My Profile</span>
-                      </DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Logout</span>
@@ -165,12 +159,6 @@ export function Navbar() {
             <div className="pt-4 border-t border-border space-y-2">
               {user ? (
                 <>
-                  <Link href="/profile" className="block" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start gap-2">
-                      <UserCircle className="w-4 h-4" />
-                      Profile
-                    </Button>
-                  </Link>
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
                     <LogOut className="w-4 h-4" />
                     Logout

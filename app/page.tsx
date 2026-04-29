@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Brain, Zap, Target, ArrowRight, MessageCircle, Code, Video, User, Shield } from 'lucide-react'
+import { Brain, Zap, Target, ArrowRight, MessageCircle, Code, Video, User, Shield, Check, Star } from 'lucide-react'
 
 // Sparkle icon component
 function SparkleIcon({ className }: { className?: string }) {
@@ -150,6 +150,76 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4 tracking-tight">{features[3].title}</h3>
               <p className="text-base sm:text-xl text-muted-foreground leading-relaxed font-medium max-w-lg">{features[3].description}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section className="py-24 lg:py-32 px-6 max-w-7xl mx-auto space-y-16 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
+          
+          <div className="text-center space-y-4 relative z-10">
+            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-foreground tracking-tight text-balance">
+              Simple, transparent <span className="text-gradient">pricing</span>
+            </h2>
+            <p className="text-lg sm:text-2xl max-w-3xl mx-auto text-muted-foreground font-medium">
+              Choose the perfect plan to elevate your chess skills.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto relative z-10">
+            {/* Free Plan */}
+            <div className="bento-card p-8 sm:p-12 flex flex-col justify-between border border-border bg-card/50 backdrop-blur-sm">
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Free</h3>
+                <div className="text-4xl sm:text-5xl font-black text-foreground mb-6">$0<span className="text-xl text-muted-foreground font-medium">/mo</span></div>
+                <p className="text-muted-foreground font-medium mb-8">Perfect for getting started and learning the basics of chess.</p>
+                <ul className="space-y-4 mb-8">
+                  {[
+                    'Base AI Game Analysis (3 per day)',
+                    'Standard Multiplayer Arena',
+                    'Basic Profile Customization',
+                    'Global Leaderboard Access'
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="w-6 h-6 text-emerald-500 shrink-0" />
+                      <span className="text-foreground font-medium">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button className="w-full py-4 rounded-xl font-bold text-lg bg-secondary text-foreground hover:bg-secondary/80 transition-colors border border-border">
+                Get Started
+              </button>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="bento-card p-8 sm:p-12 flex flex-col justify-between border border-purple-500/30 bg-gradient-to-b from-purple-900/20 to-card/50 backdrop-blur-md relative transform md:-translate-y-4 shadow-2xl shadow-purple-500/10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs font-bold uppercase tracking-widest rounded-full flex items-center gap-1 shadow-lg">
+                <Star className="w-3 h-3" /> Recommended
+              </div>
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Pro</h3>
+                <div className="text-4xl sm:text-5xl font-black text-foreground mb-6">$9.99<span className="text-xl text-muted-foreground font-medium">/mo</span></div>
+                <p className="text-muted-foreground font-medium mb-8">Advanced tools and unlimited insights for serious players.</p>
+                <ul className="space-y-4 mb-8">
+                  {[
+                    'Unlimited AI Analysis (Gemini 2.5 Flash)',
+                    'Brain Fitness Tracker (Cognitive Endurance Analytics)',
+                    'Exclusive Board & Piece Themes',
+                    'Ad-free Experience',
+                    'Priority Support'
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <Check className="w-6 h-6 text-purple-400 shrink-0" />
+                      <span className="text-foreground font-medium">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/25">
+                Upgrade Now
+              </button>
             </div>
           </div>
         </section>

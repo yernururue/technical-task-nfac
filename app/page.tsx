@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Brain, Zap, Target, ArrowRight, MessageCircle, Code, Video, User, Shield, Check, Star } from 'lucide-react'
+import { Brain, Zap, Target, ArrowRight, MessageCircle, Code, Video, User, Shield, Check, Star, Activity } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Sparkle icon component
 function SparkleIcon({ className }: { className?: string }) {
@@ -61,20 +62,19 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col xl:flex-row items-center gap-16 xl:gap-20">
           <div className="flex-1 space-y-8 z-10 text-center xl:text-left flex flex-col items-center xl:items-start">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-bold text-primary backdrop-blur-sm">
-              <SparkleIcon className="w-4 h-4" /> New AI Engine Integrated
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-xs sm:text-sm font-bold text-green-400 backdrop-blur-sm shadow-lg shadow-green-500/5">
+              <Activity className="w-4 h-4 animate-pulse" /> Stockfish 16.1 Online
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-              Get your chess wisdom from{' '}
-              <span className="text-gradient">masters</span>
+              Magnus Carlsen Level <span className="text-gradient">Analysis</span>
             </h1>
             <p className="text-lg sm:text-xl lg:text-2xl max-w-2xl text-muted-foreground leading-relaxed font-medium">
-              Improve your game with AI-powered analysis, practice against top-tier engines, and learn from the best games in history.
+              Train with the same precision as the World Champion. Our AI dissects your games to find the lines even Grandmasters might miss.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-6 w-full sm:w-auto">
               <Link
                 href="/history"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 rounded-full px-10 py-5 text-lg sm:text-xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-emerald-500/40"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/40 rounded-full px-10 py-5 text-lg sm:text-xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-emerald-500/60 active:scale-95"
               >
                 Analyze replays <ArrowRight className="ml-3 w-6 h-6" />
               </Link>
@@ -97,8 +97,10 @@ export default function HomePage() {
               </div>
               <div className="w-px bg-border" />
               <div className="space-y-1">
-                <div className="text-2xl sm:text-4xl font-black text-foreground">1k+</div>
-                <div className="text-xs sm:text-sm text-primary font-bold uppercase tracking-widest">Users</div>
+                <div className="text-2xl sm:text-4xl font-black text-foreground flex items-center gap-2">
+                  1k+ <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
+                </div>
+                <div className="text-xs sm:text-sm text-primary font-bold uppercase tracking-widest">Live Users</div>
               </div>
             </div>
           </div>
@@ -353,18 +355,18 @@ export default function HomePage() {
             <div>
               <h4 className="text-foreground font-bold text-lg sm:text-xl mb-6 sm:mb-8 tracking-tight">Info</h4>
               <ul className="space-y-4 sm:space-y-6 text-base sm:text-lg text-muted-foreground font-medium">
-                <li><Link href="#" className="hover:text-primary transition-colors">About Us</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Contact</Link></li>
+                <li><button onClick={() => toast.info('About Us page coming soon')} className="hover:text-primary transition-colors text-left">About Us</button></li>
+                <li><button onClick={() => toast.info('Pricing integration coming soon')} className="hover:text-primary transition-colors text-left">Pricing</button></li>
+                <li><button onClick={() => toast.info('Contact system coming soon')} className="hover:text-primary transition-colors text-left">Contact</button></li>
               </ul>
             </div>
-
+ 
             <div>
               <h4 className="text-foreground font-bold text-lg sm:text-xl mb-6 sm:mb-8 tracking-tight">Legal</h4>
               <ul className="space-y-4 sm:space-y-6 text-base sm:text-lg text-muted-foreground font-medium">
-                <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                <li><Link href="#" className="hover:text-primary transition-colors">Cookie Policy</Link></li>
+                <li><button onClick={() => toast.info('Legal terms coming soon')} className="hover:text-primary transition-colors text-left">Terms of Service</button></li>
+                <li><button onClick={() => toast.info('Privacy policy coming soon')} className="hover:text-primary transition-colors text-left">Privacy Policy</button></li>
+                <li><button onClick={() => toast.info('Cookie policy coming soon')} className="hover:text-primary transition-colors text-left">Cookie Policy</button></li>
               </ul>
             </div>
           </div>

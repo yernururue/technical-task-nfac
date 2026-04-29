@@ -13,6 +13,8 @@ An interactive chess platform with AI-powered coaching, play-vs-AI mode, and rea
 - **Profile Management** — track ELO, stats, and personalize board/piece themes
 - **Avatar System** — upload and sync user avatars via Supabase Storage
 - **Pricing Section** — professional two-column landing page section for monetization demo
+- **Premium UI/UX** — startup-grade aesthetics with live status indicators, glassmorphism, and smooth animations
+- **AI-Powered Analysis** — Magnus Carlsen level insights dissected by LLMs
 
 ## Tech Stack
 

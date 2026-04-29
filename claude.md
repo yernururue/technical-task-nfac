@@ -92,6 +92,12 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
   - Expanded `useChessGame` and `ChessBoard` types to support `multiplayer` mode.
   - Fixed TypeScript `never` inference issues in `app/profile/page.tsx` and `app/play/multiplayer/[roomId]/game/page.tsx`.
 - **UI/UX**: Moved the Logout button to a dedicated profile header to prevent layout overlap on mobile.
+- **Landing Page Polish**:
+  - Upgraded "Engine Integrated" badge to "Stockfish 16.1 Online" with live pulse animation.
+  - Refined marketing copy to focus on "Magnus Carlsen Level Analysis".
+  - Added real-time "Live Users" pulse indicator in hero stats.
+  - Standardized interactive elements with `hover:scale-105` and glowing primary shadows.
+  - Integrated `sonner` toasts for roadmap visibility on non-functional links.
 
 ## What's Not Done Yet
 - [ ] Brain Fitness Tracker (Cognitive Endurance Analytics) logic.

@@ -117,7 +117,7 @@ MIT
 
 ---
 
-## Personal Insight from Ernur
+## Personal Insight
 
 Я Ернур, студент Astana IT University, и этот проект — результат моего 12-часового марафона кодинга.
 

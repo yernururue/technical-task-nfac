@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { joinRoomAction } from '../actions'
+import { joinRoomAction, getPlayerIdAction } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Copy, Loader2, CheckCircle2, Swords } from 'lucide-react'
 import { toast } from 'sonner'
@@ -20,17 +20,14 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
+    let active = true;
     let channel: ReturnType<typeof createClient>['channel'] | null = null;
     const supabase = createClient()
 
     const initializeRoom = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/login?redirect=/play/multiplayer/' + roomId)
-          return
-        }
-        setCurrentUserId(user.id)
+        const player = await getPlayerIdAction()
+        setCurrentUserId(player.id)
 
         // Try to join the room
         const result = await joinRoomAction(roomId)
@@ -38,6 +35,8 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
           setRoom(result.room as RoomRow)
         }
         
+        if (!active) return
+
         // Setup realtime subscription
         channel = supabase.channel(`room:${roomId}`)
         channel
@@ -58,16 +57,19 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
       } catch (err: any) {
         console.error('Room initialization error:', err)
-        setError(err.message || 'Failed to load room')
-        toast.error(err.message || 'Failed to load room')
+        if (active) {
+          setError(err.message || 'Failed to load room')
+          toast.error(err.message || 'Failed to load room')
+        }
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
 
     initializeRoom()
 
     return () => {
+      active = false;
       if (channel) {
         supabase.removeChannel(channel)
       }

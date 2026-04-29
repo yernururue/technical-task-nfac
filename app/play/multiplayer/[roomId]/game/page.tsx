@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { useChessGame } from '@/hooks/useChessGame'
 import { createClient } from '@/lib/supabase/client'
 import { updateGamePgnAction, finalizeGameAction } from '../../game-actions'
+import { getPlayerIdAction } from '../../actions'
 import type { GameResult } from '@/types/game'
 
 function getResultLabel(result: GameResult | null): string {
@@ -48,11 +49,8 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
 
     const initializeGame = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push(`/login?redirect=/play/multiplayer/${roomId}/game`)
-          return
-        }
+        const player = await getPlayerIdAction()
+        const playerId = player.id
 
         // Fetch room
         const { data: room, error: roomError } = await supabase
@@ -76,13 +74,15 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
         setGameId(room.game_id)
 
         // Determine player colors
-        if (user.id === room.host_id) {
+        if (playerId === room.host_id) {
           setLocalPlayerColor(room.host_color as 'white' | 'black')
-        } else if (user.id === room.guest_id) {
+        } else if (playerId === room.guest_id) {
           setLocalPlayerColor(room.host_color === 'white' ? 'black' : 'white')
         } else {
           throw new Error('You are not a participant in this room.')
         }
+
+        if (!active) return
 
         // Setup real-time channel for moves
         const channel = supabase.channel(`game:${room.game_id}`)

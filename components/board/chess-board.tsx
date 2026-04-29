@@ -3,7 +3,7 @@
 import { useEffect, memo, useMemo, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { toast } from 'sonner'
-import { Square } from 'chess.js'
+import { Chess, Square, type Move } from 'chess.js'
 
 import { useChessGame } from '@/hooks/useChessGame'
 import type { GameResult, GameState } from '@/types/game'
@@ -36,11 +36,26 @@ export function ChessBoard({
   disabled = false,
   boardOrientation = 'white',
 }: ChessBoardProps): JSX.Element {
-  // Always use 'local' internally — AI page provides its own state/moves via overrides.
-  // This prevents creating a duplicate Stockfish worker.
-  const { game, gameState, makeMove } = useChessGame('local')
-  const currentState = gameStateOverride ?? gameState
-  const moveExecutor = makeMoveOverride ?? makeMove
+  // We use the internal hook for 'local' mode, but if overrides are provided (AI/Multiplayer),
+  // we prioritize them. We also maintain a dedicated Chess instance for visual hints.
+  const { game: localGame, gameState: localState, makeMove: localMakeMove } = useChessGame('local')
+  
+  const currentState = gameStateOverride ?? localState
+  const moveExecutor = makeMoveOverride ?? localMakeMove
+
+  // Dedicated chess instance for calculating legal moves (dots) and turn validation.
+  // This instance ALWAYS stays in sync with the current FEN.
+  const boardGame = useMemo(() => new Chess(), [])
+  
+  useEffect(() => {
+    if (currentState.fen && boardGame.fen() !== currentState.fen) {
+      try {
+        boardGame.load(currentState.fen)
+      } catch (e) {
+        console.error('Failed to sync board game state:', e)
+      }
+    }
+  }, [currentState.fen, boardGame])
 
   // --- Click-to-move State ---
   const [moveFrom, setMoveFrom] = useState<Square | null>(null)
@@ -56,13 +71,11 @@ export function ChessBoard({
   }, [currentState.pgn, currentState.result, currentState.status, onGameEnd])
 
   // Optimization: Memoize pieces functions to prevent recreation on every render
-  const customPieces = useMemo(() => ({
-    // If we had custom SVG components for pieces, we would memoize them here.
-    }), [])
+  const customPieces = useMemo(() => ({}), [])
 
   // --- Move Hints Logic ---
   function getMoveOptions(square: Square) {
-    const moves = game.moves({
+    const moves = boardGame.moves({
       square,
       verbose: true,
     })
@@ -72,10 +85,10 @@ export function ChessBoard({
     }
 
     const newSquares: Record<string, any> = {}
-    moves.forEach((move) => {
+    moves.forEach((move: Move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to as Square) && game.get(move.to as Square)?.color !== game.get(square)?.color
+          boardGame.get(move.to as Square) && boardGame.get(move.to as Square)?.color !== boardGame.get(square)?.color
             ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
             : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
         borderRadius: '50%',
@@ -94,7 +107,10 @@ export function ChessBoard({
   function onSquareClick(square: Square) {
     if (disabled) return
 
-    // 2nd Click: Try to move or switch selection
+    const piece = boardGame.get(square)
+    const isOurPiece = piece && (piece.color === (boardGame.turn() === 'w' ? 'w' : 'b'))
+
+    // --- 2nd Click: Try to execute move or switch selection ---
     if (moveFrom) {
       // If clicking same square, deselect
       if (moveFrom === square) {
@@ -103,19 +119,21 @@ export function ChessBoard({
         return
       }
 
-      // Try execution
-      const result = moveExecutor(moveFrom, square, 'q')
-      if (result.success) {
-        setMoveFrom(null)
-        setOptionSquares({})
-        return
+      // Check if the clicked square is a legal move
+      const moves = boardGame.moves({ square: moveFrom, verbose: true })
+      const isLegalMove = moves.some((m: Move) => m.to === square)
+
+      if (isLegalMove) {
+        const result = moveExecutor(moveFrom, square, 'q')
+        if (result.success) {
+          setMoveFrom(null)
+          setOptionSquares({})
+          return
+        }
       }
 
-      // If move failed, check if we clicked another of our own pieces to switch
-      const piece = game.get(square)
-      const currentTurn = game.turn() === 'w' ? 'white' : 'black'
-      
-      if (piece && (piece.color === 'w' ? 'white' : 'black') === currentTurn) {
+      // If it wasn't a legal move, check if we clicked another of our own pieces to switch
+      if (isOurPiece) {
         setMoveFrom(square)
         getMoveOptions(square)
         return
@@ -127,11 +145,8 @@ export function ChessBoard({
       return
     }
 
-    // 1st Click: Select piece if it's the current player's turn
-    const piece = game.get(square)
-    const currentTurn = game.turn() === 'w' ? 'white' : 'black'
-    
-    if (piece && (piece.color === 'w' ? 'white' : 'black') === currentTurn) {
+    // --- 1st Click: Select piece if it belongs to current side ---
+    if (isOurPiece) {
       setMoveFrom(square)
       getMoveOptions(square)
     }
@@ -142,7 +157,7 @@ export function ChessBoard({
       <div className="relative w-full aspect-square">
         <Chessboard
           id="chessmind-board"
-          position={currentState.fen || game.fen()}
+          position={currentState.fen || boardGame.fen()}
           boardWidth={boardWidth}
           boardOrientation={boardOrientation}
           customBoardStyle={{

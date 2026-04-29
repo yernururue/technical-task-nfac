@@ -10,6 +10,9 @@ An interactive chess platform with AI-powered coaching, play-vs-AI mode, and rea
 - **Multiplayer** — share a link and play in real-time via Supabase Broadcast
 - **AI Coach** — post-game analysis powered by Gemini 2.5 Flash / OpenRouter fallback
 - **Auth** — email + Google OAuth via Supabase
+- **Profile Management** — track ELO, stats, and personalize board/piece themes
+- **Avatar System** — upload and sync user avatars via Supabase Storage
+- **Pricing Section** — professional two-column landing page section for monetization demo
 
 ## Tech Stack
 
@@ -75,7 +78,8 @@ app/
 │   └── room/             # Multiplayer rooms
 ├── analysis/             # Game analysis view
 ├── history/              # Game history
-└── room/                 # Multiplayer game room
+├── room/                 # Multiplayer game room
+└── profile/              # User profile and settings
 
 components/
 ├── board/                # ChessBoard, MoveHistory, GameControls

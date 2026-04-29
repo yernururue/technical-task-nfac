@@ -77,7 +77,24 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 - Fixed `ChessBoard` creating duplicate Stockfish Worker — now uses 'local' mode internally
 - Difficulty levels: Easy (depth 8), Medium (depth 12), Hard (depth 18)
 
+### [2026-04-29] Profile, Pricing, and Storage
+- **Pricing Section**: Implemented a responsive two-column layout (Free vs Pro) on the landing page (`app/page.tsx`) with a premium glassmorphic theme.
+- **Profile Management**: Created a dedicated `/profile` route with statistics (ELO, wins/losses/draws), personal info editing, and JSONB-based preferences (board/pieces).
+- **Avatar System**: 
+  - Created `avatars` storage bucket via migration `004_avatars_bucket.sql`.
+  - Implemented file upload to Supabase Storage with automatic URL syncing.
+  - Added cache-busting logic (`?t=timestamp`) to bypass browser image caching.
+- **Dynamic Navbar**: 
+  - Updated `Navbar.tsx` to fetch `username`, `rating`, and `avatar_url` from the `profiles` table.
+  - Implemented **Supabase Realtime** subscription in the Navbar for instant UI updates when profile changes occur.
+  - Removed old user dropdown for a cleaner, clickable profile header.
+- **Build Stability**: 
+  - Expanded `useChessGame` and `ChessBoard` types to support `multiplayer` mode.
+  - Fixed TypeScript `never` inference issues in `app/profile/page.tsx` and `app/play/multiplayer/[roomId]/game/page.tsx`.
+- **UI/UX**: Moved the Logout button to a dedicated profile header to prevent layout overlap on mobile.
+
 ## What's Not Done Yet
-- [ ] Apply SQL migrations in Supabase Dashboard
-- [ ] Fill .env.local with real keys
-- [ ] shadcn components (run: npx shadcn@latest add button card ... )
+- [ ] Brain Fitness Tracker (Cognitive Endurance Analytics) logic.
+- [ ] Web3 Tournament integration (placeholder in landing page).
+- [ ] Actual payment integration (Pricing page is currently UI-only).
+- [ ] AI Coach feedback persistence/history view for pro users.

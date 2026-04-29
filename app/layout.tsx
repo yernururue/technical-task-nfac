@@ -21,11 +21,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'ChessMind - Learn Chess with AI Coach',
   description: 'Master chess with AI-powered analysis. Get deep insights into your games, practice against top-tier engines, and learn from the best games in history.',
+  manifest: '/manifest.json',
   keywords: ['chess', 'AI coach', 'chess analysis', 'learn chess', 'stockfish', 'chess training'],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ChessMind',
+  },
   authors: [{ name: 'ChessMind' }],
   creator: 'ChessMind',
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♟️</text></svg>",
+    icon: "/icon-192x192.png",
+    apple: "/icon-192x192.png",
   },
   openGraph: {
     title: 'ChessMind - Learn Chess with AI Coach',

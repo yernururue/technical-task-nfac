@@ -69,29 +69,43 @@ export function ProfileDialog({ userId, open, onOpenChange }: ProfileDialogProps
 
   const handleSave = async () => {
     if (!profile || !userId) return
-    if (editedUsername.trim() === '') {
+    const newUsername = editedUsername.trim()
+    
+    if (newUsername === '') {
       toast.error('Username cannot be empty')
       return
     }
 
-    setIsSaving(true)
+    if (newUsername === profile.username) {
+      setIsEditing(false)
+      return
+    }
+
+    // Capture previous state for rollback
+    const previousUsername = profile.username
+
+    // 1. Optimistic Update: Update UI instantly
+    setProfile({ ...profile, username: newUsername })
+    setIsEditing(false)
+    toast.info('Updating profile...')
+
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ username: editedUsername.trim() })
+        .update({ username: newUsername })
         .eq('id', userId)
 
       if (error) throw error
 
-      setProfile({ ...profile, username: editedUsername.trim() })
-      setIsEditing(false)
-      toast.success('Profile updated')
+      toast.success('Profile updated successfully')
       router.refresh()
     } catch (err) {
       console.error('[Profile] Save error:', err)
-      toast.error('Failed to update profile')
-    } finally {
-      setIsSaving(false)
+      
+      // 2. Rollback: If DB sync fails, revert UI state
+      setProfile({ ...profile, username: previousUsername })
+      setEditedUsername(previousUsername)
+      toast.error('Failed to sync profile change. Reverting...')
     }
   }
 

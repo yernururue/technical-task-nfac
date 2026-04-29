@@ -2,8 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+export interface StockfishEvaluation {
+  score: number // -10 to +10 range (centipawns / 100)
+  mate: number | null
+  depth: number
+}
+
 interface UseStockfishResult {
   getBestMove: (fen: string, depth?: number) => Promise<string | null>
+  evaluatePosition: (fen: string, depth?: number) => void
+  evaluation: StockfishEvaluation | null
   isReady: boolean
   error: string | null
 }
@@ -16,6 +24,7 @@ export function useStockfish(enabled: boolean = true): UseStockfishResult {
   const isReadyRef = useRef(false)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [evaluation, setEvaluation] = useState<StockfishEvaluation | null>(null)
 
   useEffect(() => {
     if (!enabled) return
@@ -33,7 +42,6 @@ export function useStockfish(enabled: boolean = true): UseStockfishResult {
           const msg = 'Stockfish init timeout: uciok not received within 5s'
           console.error('[Stockfish]', msg)
           setError(msg)
-          // Don't leave loading state hanging
           setIsReady(false)
         }
       }, INIT_TIMEOUT_MS)
@@ -47,6 +55,25 @@ export function useStockfish(enabled: boolean = true): UseStockfishResult {
           setIsReady(true)
           setError(null)
           console.log('[Stockfish] Engine ready (uciok received)')
+        }
+
+        // Parse real-time evaluation info
+        if (line.startsWith('info depth')) {
+          const depthMatch = line.match(/depth (\d+)/)
+          const scoreMatch = line.match(/score cp (-?\d+)/)
+          const mateMatch = line.match(/score mate (-?\d+)/)
+
+          if (depthMatch) {
+            const depth = parseInt(depthMatch[1])
+            if (scoreMatch) {
+              const cp = parseInt(scoreMatch[1])
+              const score = cp / 100
+              setEvaluation({ score, mate: null, depth })
+            } else if (mateMatch) {
+              const mate = parseInt(mateMatch[1])
+              setEvaluation({ score: mate > 0 ? 100 : -100, mate, depth })
+            }
+          }
         }
       }
 
@@ -98,7 +125,6 @@ export function useStockfish(enabled: boolean = true): UseStockfishResult {
             if (settled) return
             settled = true
             worker.removeEventListener('message', onMessage)
-            // "bestmove e7e5 ponder d2d4" → extract "e7e5"
             const move = line.split(' ')[1] ?? null
             console.log('[Stockfish] Best move:', move)
             resolve(move === '(none)' ? null : move)
@@ -122,5 +148,18 @@ export function useStockfish(enabled: boolean = true): UseStockfishResult {
     [],
   )
 
-  return { getBestMove, isReady, error }
+  const evaluatePosition = useCallback(
+    (fen: string, depth: number = 12) => {
+      const worker = workerRef.current
+      if (!worker || !isReadyRef.current) return
+
+      // Stop previous analysis
+      worker.postMessage('stop')
+      worker.postMessage(`position fen ${fen}`)
+      worker.postMessage(`go depth ${depth}`)
+    },
+    [],
+  )
+
+  return { getBestMove, evaluatePosition, evaluation, isReady, error }
 }

@@ -18,6 +18,9 @@ import {
   ChevronLeft,
 } from 'lucide-react'
 
+import { useStockfish } from '@/hooks/useStockfish'
+import { EvalBar } from '@/components/analysis/eval-bar'
+
 interface AnalysisData {
   summary: string
   mistakes: Array<{
@@ -54,6 +57,9 @@ export default function AnalysisPage() {
   const [moveIndex, setMoveIndex] = useState(-1)
   const [positions, setPositions] = useState<string[]>([])
   const [moveList, setMoveList] = useState<string[]>([])
+
+  // Engine state
+  const { evaluatePosition, evaluation, isReady: isEngineReady } = useStockfish(true)
 
   // Fetch game data
   useEffect(() => {
@@ -141,6 +147,13 @@ export default function AnalysisPage() {
 
   const currentFen = positions[moveIndex] || 'start'
 
+  // Update evaluation when move index changes
+  useEffect(() => {
+    if (currentFen && isEngineReady) {
+      evaluatePosition(currentFen)
+    }
+  }, [currentFen, evaluatePosition, isEngineReady])
+
   function getResultLabel(result: string): string {
     if (result === 'white') return 'White won'
     if (result === 'black') return 'Black won'
@@ -201,9 +214,16 @@ export default function AnalysisPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Board + controls */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-2xl">
-              <div className="w-full max-w-[560px] mx-auto">
-                <div className="relative w-full aspect-square">
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-2xl relative overflow-hidden">
+              <div className="flex gap-4 w-full max-w-[600px] mx-auto">
+                {/* Live Eval Bar */}
+                <EvalBar 
+                  score={evaluation?.score || 0} 
+                  mate={evaluation?.mate} 
+                  className="h-[560px]"
+                />
+
+                <div className="relative flex-1 aspect-square">
                   <Chessboard
                     id="analysis-board"
                     position={currentFen}

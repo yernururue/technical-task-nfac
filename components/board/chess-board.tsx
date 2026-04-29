@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, memo, useMemo } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { toast } from 'sonner'
 
@@ -19,6 +19,12 @@ interface ChessBoardProps {
   disabled?: boolean
   boardOrientation?: 'white' | 'black'
 }
+
+// Optimization: Memoize the Square component to prevent 64 re-renders on every move
+const CustomSquare = memo(({ children, style }: any) => (
+  <div style={style}>{children}</div>
+))
+CustomSquare.displayName = 'CustomSquare'
 
 export function ChessBoard({
   gameMode = 'local',
@@ -44,6 +50,13 @@ export function ChessBoard({
     onGameEnd(currentState.pgn, currentState.result)
   }, [currentState.pgn, currentState.result, currentState.status, onGameEnd])
 
+  // Optimization: Memoize pieces functions to prevent recreation on every render
+  const customPieces = useMemo(() => ({
+    // If we had custom SVG components for pieces, we would memoize them here.
+    // Since we're using defaults, we just pass an empty object or custom ones if needed.
+    // For now, ensuring the object itself is stable.
+    }), [])
+
   return (
     <div className="w-full max-w-[560px]">
       <div className="relative w-full aspect-square">
@@ -59,6 +72,8 @@ export function ChessBoard({
           customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
           customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
           arePiecesDraggable={!disabled}
+          customSquare={CustomSquare}
+          customPieces={customPieces}
           onPieceDrop={(sourceSquare, targetSquare) => {
             if (disabled) {
               return false

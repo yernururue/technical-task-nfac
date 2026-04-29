@@ -122,7 +122,11 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
     return () => {
       active = false
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
+        console.log('[Multiplayer] Cleaning up channel:', channelRef.current.topic)
+        supabase.removeChannel(channelRef.current).then(() => {
+          console.log('[Multiplayer] Channel removed successfully')
+        })
+        channelRef.current = null
       }
     }
   }, [roomId, router, makeMove, supabase])

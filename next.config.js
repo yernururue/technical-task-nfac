@@ -1,10 +1,16 @@
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return [
       {
         // Only apply COOP/COEP on play pages where Stockfish may need them.
-        // Applying globally breaks Supabase auth and cross-origin API calls.
         source: '/play/:path*',
         headers: [
           {
@@ -21,4 +27,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

@@ -40,32 +40,21 @@ function getModeLabel(mode: string, aiLevel: number | null): string {
   return mode
 }
 
+import { useCache } from '@/hooks/useCache'
+
 export default function HistoryPage() {
-  const [games, setGames] = useState<GameItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data: games, loading, error } = useCache<GameItem[]>(
+    'game-history',
+    async () => {
+      const res = await fetch('/api/games?limit=30')
+      if (!res.ok) throw new Error('Failed to load games')
+      const data = await res.json()
+      return data.games || []
+    },
+    { ttl: 120_000 } // 2 minutes cache
+  )
 
-  useEffect(() => {
-    async function fetchGames() {
-      try {
-        const res = await fetch('/api/games?limit=30')
-        if (!res.ok) {
-          setError('Failed to load games')
-          setLoading(false)
-          return
-        }
-        const data = await res.json()
-        setGames(data.games || [])
-      } catch (err) {
-        console.error('[History] Fetch error:', err)
-        setError('Failed to load games')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchGames()
-  }, [])
+  const gamesList = games || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 py-8">
@@ -98,7 +87,7 @@ export default function HistoryPage() {
         )}
 
         {/* Empty */}
-        {!loading && !error && games.length === 0 && (
+        {!loading && !error && gamesList.length === 0 && (
           <Card className="bg-slate-800 border-slate-700 p-12 text-center">
             <Swords className="w-16 h-16 text-slate-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-white mb-2">No games yet</h2>
@@ -110,9 +99,9 @@ export default function HistoryPage() {
         )}
 
         {/* Games list */}
-        {!loading && !error && games.length > 0 && (
+        {!loading && !error && gamesList.length > 0 && (
           <div className="space-y-3">
-            {games.map((game) => (
+            {gamesList.map((game) => (
               <Link key={game.id} href={`/analysis/${game.id}`} className="block">
                 <Card className="bg-slate-800/80 border-slate-700 hover:border-cyan-600/50 hover:bg-slate-800 transition-all p-4 cursor-pointer group">
                   <div className="flex items-center justify-between">

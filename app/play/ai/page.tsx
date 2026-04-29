@@ -138,35 +138,47 @@ export default function AIPlayPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Board */}
           <div className="lg:col-span-2">
-            {/* Status alerts */}
-            {isEngineLoading && (
-              <div className="mb-4 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg flex gap-3">
-                <Loader2 className="w-5 h-5 text-yellow-500 animate-spin flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-200">Initializing chess engine...</p>
-                  <p className="text-xs text-yellow-300 mt-1">Ready to play in a moment</p>
+            {/* Status alerts bar (persistent height to prevent layout shifts) */}
+            <div className="mb-6 min-h-[70px] w-full">
+              {isEngineLoading ? (
+                <div className="p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg flex gap-3 animate-pulse">
+                  <Loader2 className="w-5 h-5 text-yellow-500 animate-spin flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-200">Initializing chess engine...</p>
+                    <p className="text-xs text-yellow-300 mt-1">Ready to play in a moment</p>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {isAIThinking && (
-              <div className="mb-4 p-4 bg-blue-900/20 border border-blue-700 rounded-lg flex gap-3">
-                <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0" />
-                <p className="text-sm font-medium text-blue-200">AI is thinking...</p>
-              </div>
-            )}
-
-            {isGameOver().isOver && (
-              <div className="mb-4 p-4 bg-green-900/20 border border-green-700 rounded-lg flex gap-3">
-                <AlertCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-green-200">Game Over</p>
-                  <p className="text-xs text-green-300 mt-1">
-                    {isGameOver().reason === 'checkmate' ? 'Checkmate' : 'Game Finished'}
+              ) : isGameOver().isOver ? (
+                <div className="p-4 bg-green-900/20 border border-green-700 rounded-lg flex gap-3 items-center">
+                  <AlertCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-green-200">Game Over</p>
+                    <p className="text-xs text-green-300">
+                      {isGameOver().reason === 'checkmate' ? 'Checkmate' : 'Game Finished'}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className={`p-4 rounded-lg flex gap-3 items-center border transition-all duration-300 ${
+                  isAIThinking 
+                    ? "bg-blue-900/20 border-blue-700 shadow-[0_0_15px_rgba(59,130,246,0.1)]" 
+                    : "bg-slate-800/40 border-slate-700 opacity-80"
+                }`}>
+                  {isAIThinking ? (
+                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0" />
+                  ) : (
+                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                    </div>
+                  )}
+                  <p className={`text-sm font-medium transition-colors duration-300 ${
+                    isAIThinking ? "text-blue-200" : "text-slate-400"
+                  }`}>
+                    {isAIThinking ? "AI is thinking..." : "AI is watching (Your turn)"}
                   </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Chess board */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-2xl">

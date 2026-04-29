@@ -25,6 +25,7 @@ interface AnalysisData {
     comment: string
     better_move: string
   }>
+  cached?: boolean
 }
 
 interface GameData {
@@ -111,7 +112,10 @@ export default function AnalysisPage() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pgn: gameData.pgn }),
+        body: JSON.stringify({ 
+          pgn: gameData.pgn,
+          gameId: gameId
+        }),
       })
 
       if (res.ok) {
@@ -286,9 +290,16 @@ export default function AnalysisPage() {
             {/* AI Analysis */}
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-cyan-400" />
-                  AI Coach Analysis
+                <CardTitle className="text-lg text-white flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-cyan-400" />
+                    AI Coach Analysis
+                  </div>
+                  {analysis?.cached && (
+                    <span className="text-[10px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600 uppercase tracking-tighter">
+                      Cached
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>

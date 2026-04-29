@@ -53,11 +53,13 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
         const playerId = player.id
 
         // Fetch room
-        const { data: room, error: roomError } = await supabase
+        const { data, error: roomError } = await supabase
           .from('rooms')
           .select('*')
           .eq('id', roomId)
           .single()
+        
+        const room = data as any
 
         if (roomError || !room) {
           throw new Error('Room not found.')

@@ -39,7 +39,7 @@ interface UseChessGameResult {
   setAiLevel: (level: ChessLevel) => void
 }
 
-function createInitialGameState(mode: 'local' | 'ai' = 'local'): GameState {
+function createInitialGameState(mode: 'local' | 'ai' | 'multiplayer' = 'local'): GameState {
   const chess = new Chess()
   const now = new Date()
 
@@ -91,7 +91,7 @@ function cloneGame(source: Chess): Chess {
   return clone
 }
 
-function buildGameState(game: Chess, mode: 'local' | 'ai', previousState: GameState): GameState {
+function buildGameState(game: Chess, mode: 'local' | 'ai' | 'multiplayer', previousState: GameState): GameState {
   const now = new Date()
   const history = game.history({ verbose: true })
   const replay = new Chess()
@@ -125,7 +125,7 @@ function buildGameState(game: Chess, mode: 'local' | 'ai', previousState: GameSt
   }
 }
 
-export function useChessGame(mode: 'local' | 'ai' = 'local', aiLevel: ChessLevel = 2): UseChessGameResult {
+export function useChessGame(mode: 'local' | 'ai' | 'multiplayer' = 'local', aiLevel: ChessLevel = 2): UseChessGameResult {
   const [currentAiLevel, setCurrentAiLevel] = useState<ChessLevel>(aiLevel)
   const { getBestMove, isReady: isEngineReady, error: engineError } = useStockfish(mode === 'ai')
   const isEngineLoading = mode === 'ai' && !isEngineReady

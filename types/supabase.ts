@@ -14,6 +14,8 @@ export interface ProfileRow {
   wins: number
   losses: number
   draws: number
+  country: string | null
+  city: string | null
   is_pro: boolean
   preferences: Json | null
   created_at: string

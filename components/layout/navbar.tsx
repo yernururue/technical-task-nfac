@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Menu, X, User, LogOut, Settings, BarChart3, UserCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ProfileDialog } from './profile-dialog'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -30,7 +29,6 @@ export function Navbar() {
   
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [profileOpen, setProfileOpen] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -105,10 +103,12 @@ export function Navbar() {
                       <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator className="bg-border/50" />
-                    <DropdownMenuItem className="rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer py-3" onClick={() => setProfileOpen(true)}>
-                      <UserCircle className="w-4 h-4 mr-3" />
-                      <span className="font-semibold">My Profile</span>
-                    </DropdownMenuItem>
+                    <Link href="/profile">
+                      <DropdownMenuItem className="rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer py-3">
+                        <UserCircle className="w-4 h-4 mr-3" />
+                        <span className="font-semibold">My Profile</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
@@ -165,17 +165,12 @@ export function Navbar() {
             <div className="pt-4 border-t border-border space-y-2">
               {user ? (
                 <>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start gap-2"
-                    onClick={() => {
-                      setProfileOpen(true)
-                      setMobileMenuOpen(false)
-                    }}
-                  >
-                    <UserCircle className="w-4 h-4" />
-                    Profile
-                  </Button>
+                  <Link href="/profile" className="block" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
+                      <UserCircle className="w-4 h-4" />
+                      Profile
+                    </Button>
+                  </Link>
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={handleLogout}>
                     <LogOut className="w-4 h-4" />
                     Logout
@@ -196,13 +191,6 @@ export function Navbar() {
         </div>
       )}
 
-      {user && (
-        <ProfileDialog 
-          userId={user.id} 
-          open={profileOpen} 
-          onOpenChange={setProfileOpen} 
-        />
-      )}
     </nav>
   )
 }

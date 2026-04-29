@@ -105,8 +105,7 @@ export default function ProfilePage() {
         pieceStyle,
       }
 
-      const { error } = await supabase
-        .from('profiles')
+      const { error } = await (supabase.from('profiles') as any)
         .update({
           username: username.trim(),
           country: country.trim() || null,

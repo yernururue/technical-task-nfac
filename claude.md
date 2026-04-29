@@ -92,15 +92,30 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
   - Expanded `useChessGame` and `ChessBoard` types to support `multiplayer` mode.
   - Fixed TypeScript `never` inference issues in `app/profile/page.tsx` and `app/play/multiplayer/[roomId]/game/page.tsx`.
 - **UI/UX**: Moved the Logout button to a dedicated profile header to prevent layout overlap on mobile.
-- **Landing Page Polish**:
-  - Upgraded "Engine Integrated" badge to "Stockfish 16.1 Online" with live pulse animation.
-  - Refined marketing copy to focus on "Magnus Carlsen Level Analysis".
-  - Added real-time "Live Users" pulse indicator in hero stats.
-  - Standardized interactive elements with `hover:scale-105` and glowing primary shadows.
-  - Integrated `sonner` toasts for roadmap visibility on non-functional links.
+### [2026-04-29] Performance, ELO, and PWA Finalization
+- **Dynamic ELO System**:
+    - Implemented `updatePlayerRatings` server action to automate rating adjustments (+20 Win, -20 Loss, 0 Draw) in the `profiles` table.
+    - Integrated rating updates into the multiplayer game finalization flow.
+    - Added real-time ELO updates in the UI through Supabase profile subscriptions.
+- **Advanced Performance Architecture**:
+    - **Custom Caching**: Implemented a SWR-inspired caching layer (`hooks/useCache.ts`) to minimize database hits for history and leaderboard data.
+    - **UI Optimization**: Applied React `memo` and `useCallback` strategically to eliminate redundant re-renders of the ChessBoard and analysis components.
+    - **Resource Management**: Fixed memory leaks by ensuring robust cleanup of Supabase Realtime channels and Web Worker instances.
+- **Real-time Analysis (EvalBar)**:
+    - Added a vertical `EvalBar` component in `components/analysis/eval-bar.tsx`.
+    - Integrated the local Stockfish worker to provide live numerical evaluation (centipawns/mate) during both AI play and post-game analysis.
+- **PWA Implementation**:
+    - Configured `manifest.json` and added high-resolution PWA icons for mobile "Add to Home Screen" support.
+    - Updated `next.config.js` and `app/layout.tsx` for standalone app behavior and theme coloring.
+- **Leaderboard & History**:
+    - Built a dedicated Leaderboard page (`app/leaderboard/page.tsx`) with real-time ranking.
+    - Refactored `HistoryPage` to handle complex error states and display formatted game results.
+- **Stability**:
+    - Fixed "piece jitter" during drag-and-drop by disabling conflicting CSS transitions on active pieces.
+    - Standardized error handling across all Server Actions.
 
 ## What's Not Done Yet
 - [ ] Brain Fitness Tracker (Cognitive Endurance Analytics) logic.
 - [ ] Web3 Tournament integration (placeholder in landing page).
 - [ ] Actual payment integration (Pricing page is currently UI-only).
-- [ ] AI Coach feedback persistence/history view for pro users.
+- [x] AI Coach feedback persistence/history view for pro users. (Partially implemented via analysis caching)

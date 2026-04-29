@@ -59,23 +59,23 @@ export default function PlayPage() {
             </Link>
           </div>
 
-          {/* Online Multiplayer - Placeholder */}
-          <div className="bento-card flex flex-col group opacity-60 cursor-not-allowed relative overflow-hidden border-dashed">
-            <div className="absolute top-4 right-4">
-              <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-widest">
-                Coming Soon
-              </div>
+          {/* Online Multiplayer */}
+          <div className="bento-card flex flex-col group cursor-pointer relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Globe className="w-24 h-24" />
             </div>
-            <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-8 group-hover:scale-110 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
               <Globe className="w-8 h-8" />
             </div>
             <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 tracking-tight">Online Arena</h3>
             <p className="text-muted-foreground leading-relaxed font-medium mb-8 flex-grow">
               Join the global community and play against players from around the world in real-time matches.
             </p>
-            <Button disabled className="w-full bg-muted text-muted-foreground rounded-full py-6 font-bold text-lg cursor-not-allowed">
-              Coming Soon
-            </Button>
+            <Link href="/play/multiplayer" className="w-full">
+              <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white rounded-full py-6 font-bold text-lg shadow-lg shadow-purple-500/20 transition-all hover:scale-105">
+                Play Online <Globe className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </div>
 

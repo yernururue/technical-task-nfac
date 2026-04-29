@@ -17,6 +17,7 @@ interface ChessBoardProps {
   }
   boardWidth?: number
   disabled?: boolean
+  boardOrientation?: 'white' | 'black'
 }
 
 export function ChessBoard({
@@ -26,6 +27,7 @@ export function ChessBoard({
   makeMoveOverride,
   boardWidth = 560,
   disabled = false,
+  boardOrientation = 'white',
 }: ChessBoardProps): JSX.Element {
   // Always use 'local' internally — AI page provides its own state/moves via overrides.
   // This prevents creating a duplicate Stockfish worker.
@@ -49,6 +51,7 @@ export function ChessBoard({
           id="chessmind-board"
           position={currentState.fen || game.fen()}
           boardWidth={boardWidth}
+          boardOrientation={boardOrientation}
           customBoardStyle={{
             borderRadius: '0.75rem',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',

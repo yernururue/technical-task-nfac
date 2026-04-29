@@ -33,6 +33,8 @@ export function Navbar() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let profileChannel: any = null
+
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -43,6 +45,23 @@ export function Navbar() {
           .eq('id', user.id)
           .single()
         setProfile(profileData)
+
+        // Subscribe to realtime changes for this specific profile
+        profileChannel = supabase
+          .channel(`public:profiles:id=eq.${user.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${user.id}`,
+            },
+            (payload) => {
+              setProfile(payload.new)
+            }
+          )
+          .subscribe()
       } else {
         setUser(null)
         setProfile(null)
@@ -54,17 +73,23 @@ export function Navbar() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // Just re-fetch the whole thing to be safe, or wait for next reload
         fetchUser()
       } else {
         setUser(null)
         setProfile(null)
         setLoading(false)
+        if (profileChannel) {
+          supabase.removeChannel(profileChannel)
+          profileChannel = null
+        }
       }
     })
 
     return () => {
       subscription.unsubscribe()
+      if (profileChannel) {
+        supabase.removeChannel(profileChannel)
+      }
     }
   }, [supabase])
 
@@ -106,7 +131,11 @@ export function Navbar() {
                   <Button variant="ghost" className="gap-2 h-12 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all">
                     <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
                       {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                        <img 
+                          src={`${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}t=${new Date().getTime()}`} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover" 
+                        />
                       ) : (
                         <User className="w-4 h-4 text-primary" />
                       )}

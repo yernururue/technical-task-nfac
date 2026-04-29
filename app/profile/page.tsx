@@ -109,6 +109,7 @@ export default function ProfilePage() {
       }
 
       toast.success('Avatar uploaded successfully')
+      router.refresh()
     } catch (err: any) {
       console.error('[Avatar Upload]', err)
       toast.error(err.message || 'Error uploading avatar')
@@ -237,7 +238,11 @@ export default function ProfilePage() {
           onClick={() => fileInputRef.current?.click()}
         >
           {avatarUrl ? (
-            <img src={avatarUrl} alt={username} className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" />
+            <img 
+              src={`${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}t=${new Date().getTime()}`} 
+              alt={username} 
+              className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" 
+            />
           ) : (
             <User className="w-16 h-16 text-muted-foreground group-hover:opacity-40 transition-opacity" />
           )}

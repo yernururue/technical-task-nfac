@@ -79,7 +79,7 @@ export default function HistoryPage() {
         {/* Error */}
         {error && !loading && (
           <Card className="bg-slate-800 border-slate-700 p-8 text-center">
-            <p className="text-red-400 mb-4">{error}</p>
+            <p className="text-red-400 mb-4">{error.message}</p>
             <Button onClick={() => window.location.reload()} variant="outline" className="border-slate-600 text-slate-300">
               Retry
             </Button>

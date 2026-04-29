@@ -21,8 +21,8 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   useEffect(() => {
     let active = true;
-    let channel: ReturnType<typeof createClient>['channel'] | null = null;
     const supabase = createClient()
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     const initializeRoom = async () => {
       try {

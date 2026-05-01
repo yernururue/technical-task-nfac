@@ -54,7 +54,8 @@ const recentGames = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden relative">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none" />
       {/* Spacer for fixed navbar */}
       <div className="h-20" />
 
@@ -73,20 +74,43 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-6 w-full sm:w-auto">
               <Link
-                href="/history"
+                href="/play"
                 className="w-full sm:w-auto inline-flex items-center justify-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/40 rounded-full px-10 py-5 text-lg sm:text-xl font-bold transition-all duration-300 hover:scale-105 hover:shadow-emerald-500/60 active:scale-95"
               >
                 Analyze replays <ArrowRight className="ml-3 w-6 h-6" />
               </Link>
+              <Link
+                href="/auth/signup"
+                className="w-full sm:w-auto inline-flex items-center justify-center glass text-white rounded-full px-10 py-5 text-lg sm:text-xl font-bold transition-all duration-300 hover:bg-white/10 active:scale-95"
+              >
+                Join Now
+              </Link>
             </div>
           </div>
 
-          <div className="flex-1 w-full max-w-xl relative aspect-square xl:aspect-auto xl:h-[600px]">
-            {/* Grandmaster Photo Placeholder */}
-            <div className="absolute inset-0 bg-card/50 backdrop-blur-md border border-border rounded-[2.5rem] overflow-hidden flex items-center justify-center relative group shadow-2xl hover:bg-card/70 transition-colors duration-500">
-              <div className="absolute inset-0 bg-gradient-to-tr from-background via-transparent to-transparent opacity-80 z-10" />
-              <User className="w-32 h-32 sm:w-48 sm:h-48 text-muted-foreground/20 group-hover:scale-110 transition-transform duration-700" />
-              <span className="absolute bottom-8 left-8 text-muted-foreground/40 font-black text-2xl sm:text-4xl z-20 tracking-tight">Grandmaster</span>
+          <div className="flex-1 w-full max-w-xl relative aspect-square xl:aspect-auto xl:h-[600px] flex items-center justify-center">
+            {/* Board Preview instead of User icon */}
+            <div className="w-full aspect-square bg-slate-800/50 backdrop-blur-md border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl relative group p-6 flex items-center justify-center">
+              <div className="w-full aspect-square rounded-xl overflow-hidden board-shadow opacity-90 group-hover:opacity-100 transition-opacity">
+                <div className="grid grid-cols-8 grid-rows-8 w-full h-full">
+                  {[...Array(64)].map((_, i) => {
+                    const row = Math.floor(i / 8)
+                    const col = i % 8
+                    const isDark = (row + col) % 2 === 1
+                    return (
+                      <div 
+                        key={i} 
+                        className={isDark ? 'bg-slate-700/50' : 'bg-slate-300/10'} 
+                      />
+                    )
+                  })}
+                </div>
+                {/* Abstract Piece overlays */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
+                </div>
+              </div>
+              <div className="absolute bottom-8 left-8 text-white/20 font-black text-2xl sm:text-4xl z-20 tracking-tight uppercase">Mastery</div>
             </div>
 
             {/* Floating Glassmorphism Stats Card */}
@@ -190,9 +214,11 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <button className="w-full py-4 rounded-xl font-bold text-lg bg-secondary text-foreground hover:bg-secondary/80 transition-colors border border-border">
-                Get Started
-              </button>
+              <Link href="/auth/signup" className="block w-full">
+                <button className="w-full py-4 rounded-xl font-bold text-lg bg-secondary text-foreground hover:bg-secondary/80 transition-colors border border-border">
+                  Get Started
+                </button>
+              </Link>
             </div>
 
             {/* Pro Plan */}
@@ -219,9 +245,11 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-              <button className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/25">
-                Upgrade Now
-              </button>
+              <Link href="/profile" className="block w-full">
+                <button className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/25">
+                  Upgrade Now
+                </button>
+              </Link>
             </div>
           </div>
         </section>

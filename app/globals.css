@@ -208,10 +208,16 @@
 }
 
 /* Smooth transitions globally - removed transform to prevent jitter with JS animations */
-*, *::before, *::after {
+*:not([class*="piece"]):not([class*="square"]):not([class*="chessboard"]) {
   transition-property: color, background-color, border-color, box-shadow, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+/* Ensure dynamic board themes take precedence over global styles */
+[id^="chessmind-board"] [class*="square"] {
+  background-color: transparent; /* Rely on customLightSquareStyle/customDarkSquareStyle */
+  transition: none !important; /* No transitions on squares to prevent move jitter */
 }
 
 /* Scrollbar styling for dark mode */

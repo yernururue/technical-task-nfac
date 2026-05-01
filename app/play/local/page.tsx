@@ -8,6 +8,7 @@ import { Users, User, Share, Crown, BarChart3, Loader2 } from 'lucide-react'
 import { ChessBoard } from '@/components/board/chess-board'
 import { GameControls } from '@/components/board/game-controls'
 import { MoveHistory } from '@/components/board/move-history'
+import { BoardSettings } from '@/components/board/board-settings'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -133,7 +134,7 @@ export default function LocalPlayPage(): JSX.Element {
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
                 boardOrientation={gameState.currentTurn}
-                theme={boardTheme}
+                boardOrientation={gameState.currentTurn}
               />
             </div>
 
@@ -169,6 +170,8 @@ export default function LocalPlayPage(): JSX.Element {
               </Badge>
             </CardHeader>
           </Card>
+
+          <BoardSettings />
 
           <MoveHistory pgn={game.pgn()} currentMove={gameState.moveCount} />
 

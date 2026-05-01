@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ChessBoard } from '@/components/board/chess-board'
+import { BoardSettings } from '@/components/board/board-settings'
 import { useChessGame } from '@/hooks/useChessGame'
 import { useProfile } from '@/hooks/useProfile'
 import { Button } from '@/components/ui/button'
@@ -191,13 +192,14 @@ export default function AIPlayPage() {
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
                 disabled={isAIThinking || gameState.currentTurn === 'black' || isEngineLoading}
-                theme={boardTheme}
               />
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
+            <BoardSettings />
+            
             {/* Difficulty selector */}
             <Card className="bg-slate-800 border-slate-700 p-4">
               <h3 className="text-sm font-semibold text-white mb-3">Difficulty</h3>

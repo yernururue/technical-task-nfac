@@ -8,6 +8,7 @@ import { User, Share, Crown, BarChart3, Loader2 } from 'lucide-react'
 
 import { ChessBoard } from '@/components/board/chess-board'
 import { MoveHistory } from '@/components/board/move-history'
+import { BoardSettings } from '@/components/board/board-settings'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -238,7 +239,6 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
                 gameStateOverride={gameState}
                 makeMoveOverride={handleMakeMove}
                 disabled={!isPlayerTurn}
-                theme={boardTheme}
               />
             </div>
 
@@ -275,6 +275,8 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
               </Badge>
             </CardHeader>
           </Card>
+          
+          <BoardSettings />
 
           <MoveHistory pgn={game.pgn()} currentMove={gameState.moveCount} />
 

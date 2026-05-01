@@ -136,3 +136,19 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 - [ ] Actual payment integration (Pricing page is currently UI-only).
 - [x] AI Coach feedback persistence/history view for pro users. (Fully implemented via analysis caching and history page)
 - [x] Local board rotation for face-to-face play.
+
+### [2026-05-02] Customization System & UI Stability
+- **`useProfile` Refactoring**:
+    - Implemented SSR-safe `localStorage` hydration using `useEffect` to prevent hydration mismatches.
+    - Added comprehensive "Guest Mode" support, allowing non-authenticated users to persist board themes via local storage.
+    - Integrated **Supabase Realtime** into the theme system; board changes now sync instantly across all open tabs/sessions for authenticated users.
+- **`ChessBoard` Enhancements**:
+    - Connected the component directly to `useProfile` to eliminate redundant prop drilling.
+    - Implemented dynamic **CSS Variable Injection** (`--board-light`, `--board-dark`) into the document root, allowing for future-proof theme expansion.
+- **Landing Page & Asset Stability**:
+    - Fixed the missing `/grid.svg` background regression on the homepage.
+    - Resolved the `max-wxl` Tailwind typo (`max-w-xl`) and verified layout responsiveness.
+    - Applied global CSS overrides to exclude chessboard squares from general transitions, successfully eliminating "piece jitter" during move animations.
+- **Cleanup**:
+    - Standardized `BoardSettings` across AI, Local, and Multiplayer modes.
+    - Added `updatePieceStyle` to the profile hook to prepare for upcoming piece set customization.

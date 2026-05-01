@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Chess, Square, type Move } from 'chess.js'
 
 import { useChessGame } from '@/hooks/useChessGame'
+import { useProfile } from '@/hooks/useProfile'
 import type { GameResult, GameState } from '@/types/game'
 
 export type BoardTheme = 'classic' | 'wood' | 'metallic' | 'dark' | 'neon' | 'default'
@@ -47,8 +48,11 @@ export function ChessBoard({
   boardWidth = 560,
   disabled = false,
   boardOrientation = 'white',
-  theme = 'default',
+  theme: themeProp,
 }: ChessBoardProps): JSX.Element {
+  const { boardTheme: profileTheme } = useProfile()
+  const theme = themeProp || profileTheme
+  
   // We use the internal hook for 'local' mode, but if overrides are provided (AI/Multiplayer),
   // we prioritize them. We also maintain a dedicated Chess instance for visual hints.
   const { game: localGame, gameState: localState, makeMove: localMakeMove } = useChessGame('local')
@@ -56,7 +60,16 @@ export function ChessBoard({
   const currentState = gameStateOverride ?? localState
   const moveExecutor = makeMoveOverride ?? localMakeMove
   
-  const colors = BOARD_THEMES[theme] || BOARD_THEMES.default
+  const colors = BOARD_THEMES[theme as BoardTheme] || BOARD_THEMES.default
+
+  // Inject CSS variables into root for the current theme
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement
+      root.style.setProperty('--board-light', colors.light)
+      root.style.setProperty('--board-dark', colors.dark)
+    }
+  }, [colors])
 
   // Dedicated chess instance for calculating legal moves (dots) and turn validation.
   // This instance ALWAYS stays in sync with the current FEN.

@@ -97,7 +97,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 pt-24 space-y-4">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
         <h2 className="text-xl font-bold">Loading Room...</h2>
       </div>
@@ -106,7 +106,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 pt-24 space-y-6">
         <div className="w-20 h-20 rounded-3xl bg-destructive/20 text-destructive flex items-center justify-center mb-4">
           <Swords className="w-10 h-10" />
         </div>
@@ -123,7 +123,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
   const isGameStarting = room?.status === 'active'
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 pt-24 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
 

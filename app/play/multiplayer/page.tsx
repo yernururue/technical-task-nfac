@@ -20,7 +20,7 @@ export default function MultiplayerLobby() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 flex items-center justify-center p-6 pt-24">
       <div className="max-w-md w-full glass rounded-[2rem] p-8 border border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-6 opacity-5">
           <Globe className="w-48 h-48" />

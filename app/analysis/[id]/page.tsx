@@ -20,6 +20,8 @@ import {
 
 import { useStockfish } from '@/hooks/useStockfish'
 import { EvalBar } from '@/components/analysis/eval-bar'
+import { useProfile } from '@/hooks/useProfile'
+import { BOARD_THEMES } from '@/components/board/chess-board'
 
 interface AnalysisData {
   summary: string
@@ -60,6 +62,8 @@ export default function AnalysisPage() {
 
   // Engine state
   const { evaluatePosition, evaluation, isReady: isEngineReady } = useStockfish(true)
+  const { boardTheme } = useProfile()
+  const themeColors = BOARD_THEMES[boardTheme] || BOARD_THEMES.default
 
   // Fetch game data
   useEffect(() => {
@@ -233,8 +237,8 @@ export default function AnalysisPage() {
                       borderRadius: '0.75rem',
                       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                     }}
-                    customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
-                    customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
+                    customDarkSquareStyle={{ backgroundColor: themeColors.dark }}
+                    customLightSquareStyle={{ backgroundColor: themeColors.light }}
                   />
                 </div>
               </div>

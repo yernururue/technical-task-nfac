@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ChessBoard } from '@/components/board/chess-board'
 import { useChessGame } from '@/hooks/useChessGame'
+import { useProfile } from '@/hooks/useProfile'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { AlertCircle, Loader2, BarChart3 } from 'lucide-react'
@@ -26,6 +27,8 @@ export default function AIPlayPage() {
     isEngineLoading,
     isGameOver,
   } = useChessGame('ai', aiLevel)
+
+  const { boardTheme } = useProfile()
 
   // Stable refs so the effect doesn't re-fire when function identities change
   const makeAIMoveRef = useRef(makeAIMove)
@@ -188,6 +191,7 @@ export default function AIPlayPage() {
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
                 disabled={isAIThinking || gameState.currentTurn === 'black' || isEngineLoading}
+                theme={boardTheme}
               />
             </div>
           </div>

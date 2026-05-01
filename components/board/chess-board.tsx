@@ -8,6 +8,17 @@ import { Chess, Square, type Move } from 'chess.js'
 import { useChessGame } from '@/hooks/useChessGame'
 import type { GameResult, GameState } from '@/types/game'
 
+export type BoardTheme = 'classic' | 'wood' | 'metallic' | 'dark' | 'neon' | 'default'
+
+export const BOARD_THEMES: Record<BoardTheme, { light: string; dark: string }> = {
+  default: { light: '#f0ede5', dark: '#b6b3aa' },
+  classic: { light: '#f0d9b5', dark: '#b58863' }, // Standard Staunton
+  wood: { light: '#dcb35c', dark: '#926139' },    // Warm Wood
+  metallic: { light: '#d1d5db', dark: '#4b5563' }, // Slate/Gray
+  dark: { light: '#dee3e6', dark: '#8ca2ad' },    // Blue/Gray
+  neon: { light: '#1a1a1a', dark: '#0ea5e9' },    // Cyber/Neon
+}
+
 interface ChessBoardProps {
   gameMode?: 'local' | 'ai' | 'multiplayer'
   onGameEnd?: (pgn: string, result: GameResult) => void
@@ -19,6 +30,7 @@ interface ChessBoardProps {
   boardWidth?: number
   disabled?: boolean
   boardOrientation?: 'white' | 'black'
+  theme?: BoardTheme
 }
 
 // Optimization: Memoize the Square component to prevent 64 re-renders on every move
@@ -35,6 +47,7 @@ export function ChessBoard({
   boardWidth = 560,
   disabled = false,
   boardOrientation = 'white',
+  theme = 'default',
 }: ChessBoardProps): JSX.Element {
   // We use the internal hook for 'local' mode, but if overrides are provided (AI/Multiplayer),
   // we prioritize them. We also maintain a dedicated Chess instance for visual hints.
@@ -42,6 +55,8 @@ export function ChessBoard({
   
   const currentState = gameStateOverride ?? localState
   const moveExecutor = makeMoveOverride ?? localMakeMove
+  
+  const colors = BOARD_THEMES[theme] || BOARD_THEMES.default
 
   // Dedicated chess instance for calculating legal moves (dots) and turn validation.
   // This instance ALWAYS stays in sync with the current FEN.
@@ -164,8 +179,8 @@ export function ChessBoard({
             borderRadius: '0.75rem',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
           }}
-          customDarkSquareStyle={{ backgroundColor: '#b6b3aa' }}
-          customLightSquareStyle={{ backgroundColor: '#f0ede5' }}
+          customDarkSquareStyle={{ backgroundColor: colors.dark }}
+          customLightSquareStyle={{ backgroundColor: colors.light }}
           arePiecesDraggable={!disabled}
           customSquare={CustomSquare}
           customPieces={customPieces}

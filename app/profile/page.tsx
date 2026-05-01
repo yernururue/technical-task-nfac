@@ -439,10 +439,12 @@ export default function ProfilePage() {
                       <SelectValue placeholder="Select a theme" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border bg-card/95 backdrop-blur-xl">
-                      <SelectItem value="default">Default</SelectItem>
-                      <SelectItem value="wood">Wood</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="neon">Neon</SelectItem>
+                      <SelectItem value="default">Default (Slate)</SelectItem>
+                      <SelectItem value="classic">Classic (Green)</SelectItem>
+                      <SelectItem value="wood">Warm Wood</SelectItem>
+                      <SelectItem value="metallic">Metallic (Steel)</SelectItem>
+                      <SelectItem value="dark">Lichess Blue</SelectItem>
+                      <SelectItem value="neon">Cyber Neon</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

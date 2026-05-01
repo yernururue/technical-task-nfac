@@ -122,6 +122,10 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
     - Fixed a critical race condition where rapid piece movement could cause the board to get stuck or desynchronize from the internal state.
 - **Local Play Enhancements**:
     - Implemented **Automatic Board Rotation** in 1vs1 local mode. The board now automatically flips orientation based on the active player's turn to facilitate face-to-face play on a single device.
+- **Board Theme Customization**:
+    - Introduced a robust theme system for the `ChessBoard` component.
+    - Added new high-quality themes: **Classic** (Staunton), **Warm Wood**, and **Metallic** (Steel).
+    - Created `useProfile` hook to globally sync board preferences across AI, Local, Multiplayer, and Analysis modes.
 - **Documentation**:
     - Finalized `README.md` with personal insights and updated technical stack details.
     - Synchronized `claude.md` with the latest architecture and feature milestones.

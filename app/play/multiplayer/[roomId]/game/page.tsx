@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useChessGame } from '@/hooks/useChessGame'
+import { useProfile } from '@/hooks/useProfile'
 import { createClient } from '@/lib/supabase/client'
 import { updateGamePgnAction, finalizeGameAction } from '../../game-actions'
 import { getPlayerIdAction } from '../../actions'
@@ -39,6 +40,7 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
   const [isGameFinalized, setIsGameFinalized] = useState(false)
 
   const { game, gameState, makeMove, getPGN } = useChessGame('multiplayer')
+  const { boardTheme } = useProfile()
   
   const supabase = createClient()
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -236,6 +238,7 @@ export default function MultiplayerGamePage({ params }: { params: { roomId: stri
                 gameStateOverride={gameState}
                 makeMoveOverride={handleMakeMove}
                 disabled={!isPlayerTurn}
+                theme={boardTheme}
               />
             </div>
 

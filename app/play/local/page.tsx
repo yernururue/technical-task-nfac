@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useChessGame } from '@/hooks/useChessGame'
+import { useProfile } from '@/hooks/useProfile'
 import type { GameResult } from '@/types/game'
 
 function getResultLabel(result: GameResult | null): string {
@@ -24,6 +25,7 @@ function getResultLabel(result: GameResult | null): string {
 
 export default function LocalPlayPage(): JSX.Element {
   const { game, gameState, makeMove, resetGame, resignGame, getPGN, isGameOver } = useChessGame('local')
+  const { boardTheme } = useProfile()
 
   const [savedGameId, setSavedGameId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -131,6 +133,7 @@ export default function LocalPlayPage(): JSX.Element {
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
                 boardOrientation={gameState.currentTurn}
+                theme={boardTheme}
               />
             </div>
 

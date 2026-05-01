@@ -113,9 +113,22 @@ Target: Russian-speaking chess learners who want to understand their mistakes.
 - **Stability**:
     - Fixed "piece jitter" during drag-and-drop by disabling conflicting CSS transitions on active pieces.
     - Standardized error handling across all Server Actions.
+### [2026-05-01] UX Refinement and Board Logic
+- **Interaction Model**:
+    - Implemented **Click-to-move** support in the `ChessBoard` component, allowing users to move pieces by clicking source and target squares instead of just dragging.
+    - Added **Visual Move Hints**: Valid destination squares are now highlighted with dots (empty squares) or rings (capture targets) when a piece is selected.
+- **Board Refactoring**:
+    - Decoupled board interaction logic from move execution by introducing a dedicated `Chess` instance for validation and visual state synchronization.
+    - Fixed a critical race condition where rapid piece movement could cause the board to get stuck or desynchronize from the internal state.
+- **Local Play Enhancements**:
+    - Implemented **Automatic Board Rotation** in 1vs1 local mode. The board now automatically flips orientation based on the active player's turn to facilitate face-to-face play on a single device.
+- **Documentation**:
+    - Finalized `README.md` with personal insights and updated technical stack details.
+    - Synchronized `claude.md` with the latest architecture and feature milestones.
 
 ## What's Not Done Yet
-- [ ] Brain Fitness Tracker (Cognitive Endurance Analytics) logic.
+- [x] Brain Fitness Tracker (Cognitive Endurance Analytics) logic. (Implemented basic move-time tracking)
 - [ ] Web3 Tournament integration (placeholder in landing page).
 - [ ] Actual payment integration (Pricing page is currently UI-only).
-- [x] AI Coach feedback persistence/history view for pro users. (Partially implemented via analysis caching)
+- [x] AI Coach feedback persistence/history view for pro users. (Fully implemented via analysis caching and history page)
+- [x] Local board rotation for face-to-face play.

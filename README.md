@@ -6,7 +6,8 @@ An interactive chess platform with AI-powered coaching, play-vs-AI mode, and rea
 
 - **Play vs AI** — local Stockfish engine (runs in browser via Web Worker, no server needed)
   - Three difficulty levels: Easy / Medium / Hard
-- **Play Local** — two players on the same board
+- **Play Local** — two players on the same board with **Automatic Board Rotation**
+- **Interaction Model** — support for both **Drag-and-Drop** and **Click-to-move** with visual legal move hints
 - **Multiplayer** — share a link and play in real-time via Supabase Broadcast
 - **AI Coach** — post-game analysis powered by Gemini 2.5 Flash / OpenRouter fallback
 - **Auth** — email + Google OAuth via Supabase

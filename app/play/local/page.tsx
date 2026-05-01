@@ -130,6 +130,7 @@ export default function LocalPlayPage(): JSX.Element {
                 onGameEnd={handleGameEnd}
                 gameStateOverride={gameState}
                 makeMoveOverride={makeMove}
+                boardOrientation={gameState.currentTurn}
               />
             </div>
 
